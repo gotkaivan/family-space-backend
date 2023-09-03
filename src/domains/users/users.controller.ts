@@ -1,15 +1,11 @@
-import { Controller, Get, UseGuards, UsePipes, Req, Patch, Param, Body } from '@nestjs/common'
+import { Controller, Get, UseGuards, UsePipes, Req, Patch, Param, Body, Post } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags, ApiCookieAuth, ApiBearerAuth } from '@nestjs/swagger'
-import { Request } from 'express'
 import { JwtAuthGuard } from 'src/domains/auth/guards/jwt-auth.guard'
-import { ValidationPipe } from 'src/pipes/validation.pipe'
 import { UserModel } from './user.model'
 import { UsersService } from './users.service'
-import { getLocalToken } from 'src/helpers/getLocalToken'
-import { UserEntity } from './entity/user.entity'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UserDto } from './dto/user.dto'
-import { UserWithPassword } from './dto/user-with-pawwrord.dto'
+import { TokenDtoRequest } from './dto/by-token-request.dto'
 
 @Controller('users')
 @ApiTags('Users')
@@ -21,16 +17,17 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Получение всех пользователей' })
-  @ApiResponse({ status: 200, type: [UserModel] })
-  @UsePipes(ValidationPipe)
+  @ApiResponse({ status: 200, type: [UserDto] })
   @Get()
   public async getAllUsers(): Promise<UserDto[]> {
     return this.userService.getAllUsers()
   }
 
-  @Get('/by-token')
-  public getUserByToken(@Req() request: Request): Promise<UserDto> {
-    return this.userService.getUserByToken(getLocalToken(request))
+  @ApiOperation({ summary: 'Получение пользователя по токену' })
+  @ApiResponse({ status: 200, type: UserDto })
+  @Post('/by-token')
+  public getUserByToken(@Body() dto: TokenDtoRequest): Promise<UserDto> {
+    return this.userService.getUserByToken(dto.accessToken)
   }
 
   @Patch(':id')

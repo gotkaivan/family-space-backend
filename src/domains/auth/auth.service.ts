@@ -38,7 +38,10 @@ export class AuthService {
 
     const isUserFound = await this.userService.checkUniqueUser(userEntity.email)
     if (isUserFound) {
-      throw new HttpException('Пользователь с таким логином или e-mail уже существует', HttpStatus.BAD_REQUEST)
+      throw new HttpException(
+        { message: 'Пользователь с таким логином или e-mail уже существует' },
+        HttpStatus.BAD_REQUEST
+      )
     }
 
     const salt = bcrypt.genSaltSync(10)
@@ -49,11 +52,6 @@ export class AuthService {
       ...userEntity,
       password: hashPassword,
     })
-
-    // response.cookie(LOCAL_TOKEN, this.generateToken(user), {
-    //   httpOnly: true,
-    //   secure: false, //--> SET TO TRUE ON PRODUCTION
-    // })
 
     return { user: this.getUserResponse(user), token: this.generateToken(user) }
   }

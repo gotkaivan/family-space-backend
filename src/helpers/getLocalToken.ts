@@ -1,8 +1,7 @@
-import { LOCAL_TOKEN } from './../configs/tokens'
 import { Request } from 'express'
 
-export const getLocalToken = (request: Request) => {
+export const getTokenByRequest = (request: Request) => {
   let token = null
-  if (request && request.cookies) token = request.cookies[LOCAL_TOKEN]
+  if (request && request.headers.authorization) token = request.headers.authorization
   return token
 }

@@ -4,6 +4,9 @@ import { ConfigModule } from '@nestjs/config'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { AuthModule } from './domains/auth/auth.module'
 import { UsersModule } from './domains/users/users.module'
+import { TransactionModule } from './domains/transaction/transaction.module'
+import { InvestmentModule } from './domains/investment/investment.module'
+import { TaskModule } from './domains/kanban/kanban.module'
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { UsersModule } from './domains/users/users.module'
     }),
     AuthModule,
     UsersModule,
+    TransactionModule,
+    InvestmentModule,
+    TaskModule,
   ],
   controllers: [],
   providers: [],

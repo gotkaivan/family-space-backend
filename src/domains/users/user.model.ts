@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { BelongsToMany, Column, DataType, HasMany, Model, Table } from 'sequelize-typescript'
+import { BelongsToMany, Column, DataType, Model, Table } from 'sequelize-typescript'
 import { IUser } from './types'
 
 @Table({ tableName: 'users' })

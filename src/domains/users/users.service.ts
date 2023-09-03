@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Op } from 'sequelize'
 import jwt_decode from 'jwt-decode'
@@ -22,28 +22,25 @@ export class UsersService {
   }
 
   async getUserByEmail(email: string): Promise<UserWithPassword> {
-    return await this.userRepository.findOne({
+    const user = await this.userRepository.findOne({
       raw: true,
       where: { email },
       include: { all: true },
     })
+
+    if (!user) throw new HttpException('Пользователь по такому email не найден', HttpStatus.NOT_FOUND)
+
+    return user
   }
 
-  async getUserById(id: number): Promise<UserEntity> {
-    return await this.userRepository.findOne({
+  async getUserById(id: number): Promise<IUser> {
+    const user = await this.userRepository.findOne({
       raw: true,
       where: { id },
       include: { all: true },
     })
-  }
 
-  async getUserByEmailWithoutPassword(email: string): Promise<IUser | null> {
-    const user = await this.userRepository.findOne({
-      raw: true,
-      where: { email },
-    })
-
-    if (!user) return null
+    if (!user) throw new NotFoundException({ message: 'Пользователь по такому id не найден' })
 
     const { password, ...other } = user
     return {
@@ -51,8 +48,25 @@ export class UsersService {
     }
   }
 
-  async getUserByToken(token: string | null): Promise<IUser | null> {
-    if (!token) return null
+  async getUserByEmailWithoutPassword(email: string): Promise<IUser> {
+    console.log(email)
+    const user = await this.userRepository.findOne({
+      raw: true,
+      where: { email },
+      include: { all: true },
+    })
+
+    console.log(user)
+
+    if (!user) throw new NotFoundException({ message: 'Пользователь по такому id не найден' })
+
+    const { password, ...other } = user
+    return {
+      ...other,
+    }
+  }
+
+  async getUserByToken(token: string): Promise<IUser> {
     const { email } = jwt_decode<UserEntity>(token)
     return await this.getUserByEmailWithoutPassword(email)
   }

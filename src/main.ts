@@ -3,6 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
 
 import * as cookieParser from 'cookie-parser'
+import { ValidationPipe } from '@nestjs/common'
 // somewhere in your initialization file
 
 async function bootstrap() {
