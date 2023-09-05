@@ -3,8 +3,6 @@ import { BelongsToMany, Column, DataType, HasMany, HasOne, Model, Table } from '
 import { UserModel } from 'src/domains/users/user.model'
 import { UserEntity } from 'src/domains/users/entity/user.entity'
 import { UserTaskStatusModel } from './user-task-status.model'
-import { TaskStatusPositionModel } from './task-status-position.model'
-import { TaskStatusPositionEntity } from '../entity/task-status-position.entity'
 import { CreateTaskStatusDto } from '../dto/request/create-task-status.dto'
 import { TaskEntity } from '../../task/entity/task.entity'
 import { TaskModel } from '../../task/models/task.model'
@@ -28,11 +26,12 @@ export class TaskStatusModel extends Model<TaskStatusModel, CreateTaskStatusDto>
   @Column({ type: DataType.STRING, allowNull: true })
   description: string
 
+  @ApiProperty({ example: '1000000', description: 'Позици задачи' })
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  position: number
+
   @BelongsToMany(() => UserModel, () => UserTaskStatusModel)
   user: UserEntity[]
-
-  @HasOne(() => TaskStatusPositionModel)
-  position: TaskStatusPositionEntity
 
   @HasMany(() => TaskModel)
   tasks: TaskEntity[]

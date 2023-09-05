@@ -6,9 +6,6 @@ import { CreateTaskDto } from './dto/request/create-task.dto'
 import { UpdateTaskDto } from './dto/request/update-task.dto'
 import { TaskUserModel } from './models/task-user.model'
 import { AttachTaskToUser } from './dto/request/attach-task-to-user'
-import { TaskPositionModel } from './models/task-position.model'
-import { CreateTaskPositionDto } from './dto/request/create-task-position.dto'
-import { UpdateTaskPositionDto } from './dto/request/update-task-position.dto'
 import { TaskDto } from './dto/task.dto'
 
 @Injectable()
@@ -16,7 +13,6 @@ export class TaskService {
   constructor(
     @InjectModel(TaskModel) private taskRepository: typeof TaskModel,
     @InjectModel(TaskUserModel) private userTaskRepository: typeof TaskUserModel,
-    @InjectModel(TaskPositionModel) private taskPositionRepository: typeof TaskPositionModel,
     private userService: UsersService
   ) {}
 
@@ -79,9 +75,10 @@ export class TaskService {
 
   async updateTask(accessToken: string, task: UpdateTaskDto): Promise<TaskDto> {
     try {
-      await this.taskRepository.update({ ...task }, { where: { id: task.id } })
+      await this.taskRepository.update({ ...task, position: Math.round(task.position) }, { where: { id: task.id } })
       return await this.getTaskById(accessToken, task.id)
     } catch (e) {
+      console.log(e)
       throw new HttpException('Не удалось обновить задачу', HttpStatus.BAD_REQUEST)
     }
   }
@@ -103,24 +100,6 @@ export class TaskService {
       return { id: deletedId }
     } catch (e) {
       throw new HttpException('Не удалось удалить задачу', HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async setTaskPosition(item: CreateTaskPositionDto): Promise<boolean> {
-    await this.taskPositionRepository.findOrCreate({
-      raw: true,
-      where: item,
-      defaults: item,
-    })
-    return true
-  }
-
-  async changeTaskPosition(dto: UpdateTaskPositionDto): Promise<boolean> {
-    try {
-      await this.taskPositionRepository.update(dto, { where: { id: dto.id } })
-      return true
-    } catch (e) {
-      throw new HttpException('Не удалось обновить позицию статуса', HttpStatus.BAD_REQUEST)
     }
   }
 

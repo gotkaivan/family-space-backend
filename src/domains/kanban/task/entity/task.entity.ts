@@ -25,6 +25,7 @@ export class TaskEntity implements ITask {
   @ApiProperty({ description: 'Подзадачи', type: [SubtaskDto] })
   subtasks: SubtaskEntity[]
 
-  @ApiProperty({ description: '1', example: 'Позиция статуса' })
-  position: TaskPositionEntity
+  @ApiProperty({ description: '1', example: 'Позиция задачи' })
+  @IsNumber()
+  readonly position: number
 }

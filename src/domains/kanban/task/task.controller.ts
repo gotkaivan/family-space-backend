@@ -6,8 +6,6 @@ import { JwtAuthGuard } from 'src/domains/auth/guards/jwt-auth.guard'
 import { TaskDto } from './dto/task.dto'
 import { getTokenByRequest } from 'src/helpers'
 import { CreateTaskDto } from './dto/request/create-task.dto'
-import { UpdateTaskPositionDto } from './dto/request/update-task-position.dto'
-import { CreateTaskPositionDto } from './dto/request/create-task-position.dto'
 import { CreateTaskResponseDto } from './dto/response/create-task.dto'
 import { UpdateTaskResponseDto } from './dto/response/update-task.dto'
 import { DeleteTaskResponseDto } from './dto/response/delete-task.dto'
@@ -62,23 +60,5 @@ export class TaskController {
   @Delete(':id')
   deleteTask(@Param('id') id: number): Promise<DeleteTaskResponseDto> {
     return this.taskService.deleteTask(id)
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Добавление позиции задачи' })
-  @ApiResponse({ status: 200, type: Boolean })
-  @Post('set-position')
-  setStatusPosition(@Body() status: CreateTaskPositionDto): Promise<boolean> {
-    return this.taskService.setTaskPosition(status)
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Обновление позиции задачи' })
-  @ApiResponse({ status: 200, type: Boolean })
-  @Post('change-position')
-  changeStatusPosition(@Body() status: UpdateTaskPositionDto): Promise<boolean> {
-    return this.taskService.changeTaskPosition(status)
   }
 }

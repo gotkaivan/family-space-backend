@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsString } from 'class-validator'
+import { IsNumber, IsString } from 'class-validator'
 import { ITaskStatus } from '../types'
 import { TaskEntity } from '../../task/entity/task.entity'
 import { TaskDto } from '../../task/dto/task.dto'
@@ -18,9 +18,10 @@ export class TaskStatusEntity implements ITaskStatus {
   @IsString({ message: 'Должно быть строкой' })
   readonly description: string
 
+  @ApiProperty({ example: 'Позиция статуса', description: 'Позиция статуса' })
+  @IsNumber()
+  position: number
+
   @ApiProperty({ description: 'Задачи', type: [TaskDto] })
   tasks: TaskEntity[]
-
-  @ApiProperty({ example: 'Позиция статуса' })
-  position: TaskStatusPositionEntity
 }

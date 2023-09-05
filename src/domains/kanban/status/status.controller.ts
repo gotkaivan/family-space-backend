@@ -6,9 +6,6 @@ import { getTokenByRequest } from 'src/helpers'
 import { TaskStatusDto } from './dto/task-status.dto'
 import { CreateTaskStatusDto } from './dto/request/create-task-status.dto'
 import { TaskStatusService } from './status.service'
-import { CreateTaskStatusPositionDto } from './dto/request/create-task-status-position.dto'
-import { UpdateTaskStatusPositionDto } from './dto/request/update-task-status-position.dto'
-import { CreateTaskStatusResponseDto } from './dto/response/create-task-status.dto'
 import { DeleteTaskStatusResponseDto } from './dto/response/delete-task-status.dto'
 
 @Controller('task-status')
@@ -62,23 +59,5 @@ export class StatusController {
   @Delete(':id')
   deleteStatus(@Param('id') id: number): Promise<DeleteTaskStatusResponseDto> {
     return this.taskStatusService.deleteTaskStatus(id)
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Добавление позиции статуса' })
-  @ApiResponse({ status: 200, type: Boolean })
-  @Post('set-position')
-  setStatusPosition(@Body() status: CreateTaskStatusPositionDto): Promise<boolean> {
-    return this.taskStatusService.setStatusPosition(status)
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Обновление позиции статуса' })
-  @ApiResponse({ status: 200, type: Boolean })
-  @Post('change-position')
-  changeStatusPosition(@Body() status: UpdateTaskStatusPositionDto): Promise<boolean> {
-    return this.taskStatusService.changeStatusPosition(status)
   }
 }

@@ -10,12 +10,9 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript'
-import { ITask } from '../types'
 import { UserModel } from 'src/domains/users/user.model'
 import { UserEntity } from 'src/domains/users/entity/user.entity'
 import { TaskUserModel } from './task-user.model'
-import { TaskPositionModel } from './task-position.model'
-import { TaskPositionEntity } from '../entity/task-position.entity'
 import { TaskStatusModel } from '../../status/models/task-status.model'
 import { CreateTaskDto } from '../dto/request/create-task.dto'
 import { SubtaskEntity } from '../../subtask/entity/subtask.entity'
@@ -46,14 +43,15 @@ export class TaskModel extends Model<TaskModel, CreateTaskDto> {
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 1 })
   statusId: number
 
+  @ApiProperty({ example: '1000000', description: 'Позици задачи' })
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  position: number
+
   @BelongsToMany(() => UserModel, () => TaskUserModel)
   user: UserEntity[]
 
   @BelongsTo(() => TaskStatusModel)
   status: TaskStatusEntity
-
-  @HasOne(() => TaskPositionModel)
-  position: TaskPositionEntity
 
   @HasMany(() => SubtaskModel)
   subtasks: SubtaskEntity[]

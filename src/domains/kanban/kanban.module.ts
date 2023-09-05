@@ -11,11 +11,9 @@ import { SubtaskController } from './subtask/subtask.controller'
 import { StatusController } from './status/status.controller'
 import { TaskUserModel } from './task/models/task-user.model'
 import { SubtaskUserModel } from './subtask/models/subtask-user.model'
-import { TaskPositionModel } from './task/models/task-position.model'
 import { TaskStatusModel } from './status/models/task-status.model'
 import { UserTaskStatusModel } from './status/models/user-task-status.model'
 import { TaskStatusService } from './status/status.service'
-import { TaskStatusPositionModel } from './status/models/task-status-position.model'
 
 @Module({
   controllers: [TaskController, SubtaskController, StatusController],
@@ -28,8 +26,6 @@ import { TaskStatusPositionModel } from './status/models/task-status-position.mo
       SubtaskUserModel,
       UserTaskStatusModel,
       UserModel,
-      TaskPositionModel,
-      TaskStatusPositionModel,
     ]),
   ],
   providers: [TaskService, TaskStatusService, SubtaskService, UsersService],

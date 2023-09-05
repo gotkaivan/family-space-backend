@@ -7,15 +7,11 @@ import { TaskStatusModel } from './models/task-status.model'
 import { CreateTaskStatusDto } from './dto/request/create-task-status.dto'
 import { UpdateTaskStatusDto } from './dto/request/update-task-status.dto'
 import { AttachTaskStatusToUserDto } from './dto/request/attach-task-status-to-user.dto'
-import { CreateTaskStatusPositionDto } from './dto/request/create-task-status-position.dto'
-import { TaskStatusPositionModel } from './models/task-status-position.model'
-import { UpdateTaskStatusPositionDto } from './dto/request/update-task-status-position.dto'
 
 @Injectable()
 export class TaskStatusService {
   constructor(
     @InjectModel(TaskStatusModel) private taskStatusRepository: typeof TaskStatusModel,
-    @InjectModel(TaskStatusPositionModel) private taskStatusPositionRepository: typeof TaskStatusPositionModel,
     @InjectModel(UserTaskStatusModel) private userTaskStatusRepository: typeof UserTaskStatusModel,
     private userService: UsersService
   ) {}
@@ -24,28 +20,24 @@ export class TaskStatusService {
     try {
       const { id } = await this.userService.getUserByToken(accessToken)
       const response = await this.taskStatusRepository.findAll({
-        attributes: ['id', 'title', 'description'],
+        attributes: ['id', 'title', 'description', 'position'],
+        order: [
+          ['position', 'DESC'],
+          ['tasks', 'position', 'DESC'],
+        ],
         include: [
           {
             association: 'tasks',
-            attributes: ['id', 'title', 'description', 'statusId'],
+            attributes: ['id', 'title', 'description', 'statusId', 'position'],
             include: [
               {
                 attributes: ['id', 'content', 'isCompleted', 'position', 'taskId'],
                 association: 'subtasks',
               },
-              {
-                association: 'position',
-                order: [['position', 'ASC']],
-              },
             ],
           },
           {
-            association: 'position',
-            order: [['position', 'DESC']],
-          },
-          {
-            attributes: [],
+            attributes: ['id'],
             association: 'user',
             where: {
               id,
@@ -65,7 +57,7 @@ export class TaskStatusService {
       const status = await this.taskStatusRepository.findOne({
         where: { id },
         include: {
-          attributes: [],
+          attributes: ['id'],
           where: { id: user.id },
           required: true,
           association: 'user',
@@ -86,13 +78,17 @@ export class TaskStatusService {
 
       return this.getTaskStatusById(accessToken, statusId)
     } catch (e) {
+      console.log(e)
       throw new HttpException('Не удалось создать статус', HttpStatus.BAD_REQUEST)
     }
   }
 
   async updateTaskStatus(accessToken: string, status: UpdateTaskStatusDto): Promise<TaskStatusDto> {
     try {
-      await this.taskStatusRepository.update(status, { where: { id: status.id } })
+      await this.taskStatusRepository.update(
+        { ...status, position: Math.round(status.position) },
+        { where: { id: status.id } }
+      )
       return this.getTaskStatusById(accessToken, status.id)
     } catch (e) {
       throw new HttpException('Не удалось обновить статус', HttpStatus.BAD_REQUEST)
@@ -116,30 +112,6 @@ export class TaskStatusService {
       return { id: deletedId }
     } catch (e) {
       throw new HttpException('Не удалось удалить статус', HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async setStatusPosition(status: CreateTaskStatusPositionDto): Promise<boolean> {
-    try {
-      await this.taskStatusPositionRepository.findOrCreate({
-        raw: true,
-        where: status,
-        defaults: status,
-      })
-
-      return true
-    } catch (e) {
-      console.log(e)
-      throw new HttpException('Не удалось задать позицию статуса', HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async changeStatusPosition(status: UpdateTaskStatusPositionDto): Promise<boolean> {
-    try {
-      await this.taskStatusPositionRepository.update(status, { where: { id: status.id } })
-      return true
-    } catch (e) {
-      throw new HttpException('Не удалось обновить позицию статуса', HttpStatus.BAD_REQUEST)
     }
   }
 
