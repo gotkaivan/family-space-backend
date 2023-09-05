@@ -17,7 +17,7 @@ import { TaskModule } from './domains/kanban/kanban.module'
       dialect: 'postgres',
       host: 'localhost',
       port: 5432,
-      username: 'postgres',
+      username: 'family',
       password: '43081',
       database: 'family',
       models: [UserModel],
