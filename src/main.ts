@@ -1,14 +1,20 @@
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
+import fs from 'fs'
 
 import * as cookieParser from 'cookie-parser'
-import { ValidationPipe } from '@nestjs/common'
-// somewhere in your initialization file
+
+const httpsOptions = {
+  key: fs.readFileSync('/var/www/httpd-cert/api-fincome.space_2023-09-06-11-25_07.key'),
+  cert: fs.readFileSync('/var/www/httpd-cert/api-fincome.space_2023-09-06-11-25_07.crt'),
+}
 
 async function bootstrap() {
   const PORT = process.env.PORT || 7000
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions,
+  })
 
   app.use(cookieParser())
 
