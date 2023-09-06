@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
-import fs from 'fs'
+const fs = require('fs')
 
 import * as cookieParser from 'cookie-parser'
 
