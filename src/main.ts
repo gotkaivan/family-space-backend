@@ -14,10 +14,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('/api')
 
-  app.enableCors({
-    credentials: true,
-    origin: '*',
-  })
+  app.enableCors()
 
   const config = new DocumentBuilder()
     .setTitle('Семейное приложение')
