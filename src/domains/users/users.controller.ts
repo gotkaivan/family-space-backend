@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, UsePipes, Req, Patch, Param, Body, Post } from '@nestjs/common'
+import { Controller, Get, UseGuards, Req, Patch, Param, Body, Post } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags, ApiCookieAuth, ApiBearerAuth } from '@nestjs/swagger'
 import { JwtAuthGuard } from 'src/domains/auth/guards/jwt-auth.guard'
 import { UserModel } from './user.model'
@@ -6,6 +6,8 @@ import { UsersService } from './users.service'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UserDto } from './dto/user.dto'
 import { TokenDtoRequest } from './dto/by-token-request.dto'
+import { getTokenByRequest } from 'src/helpers'
+import { Request } from 'express'
 
 @Controller('users')
 @ApiTags('Users')
@@ -26,8 +28,8 @@ export class UsersController {
   @ApiOperation({ summary: 'Получение пользователя по токену' })
   @ApiResponse({ status: 200, type: UserDto })
   @Post('/by-token')
-  public getUserByToken(@Body() dto: TokenDtoRequest): Promise<UserDto> {
-    return this.userService.getUserByToken(dto.accessToken)
+  public getUserByToken(@Req() request: Request): Promise<UserDto> {
+    return this.userService.getUserByToken(getTokenByRequest(request))
   }
 
   @Patch(':id')

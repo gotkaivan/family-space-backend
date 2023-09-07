@@ -12,26 +12,21 @@ import { IUser } from '../users/types'
 export class AuthService {
   constructor(private userService: UsersService, private jwtService: JwtService) {}
 
-  async login({ user: userEntity }): Promise<AuthResponseDto> {
+  async login({ user: userEntity, response }): Promise<AuthResponseDto> {
     const user = await this.validateUser(userEntity)
 
-    // var date = new Date()
-    // date.setDate(date.getDate() + 7)
-
-    // if (user) {
-    //   response.cookie(LOCAL_TOKEN, this.generateToken(user), {
-    //     secure: true, //--> SET TO TRUE ON PRODUCTION,
-    //     httpOnly: false,
-    //     withCredentials: 'include',
-    //     sameSite: 'none',
-    //     expire: date,
-    //   })
-    // }
+    if (user) {
+      response.cookie(LOCAL_TOKEN, this.generateToken(user), {
+        secure: true, //--> SET TO TRUE ON PRODUCTION,
+        sameSite: 'none',
+        httpOnly: true,
+      })
+    }
 
     return { user: this.getUserResponse(user), token: this.generateToken(user) }
   }
 
-  async register({ user: userEntity }): Promise<AuthResponseDto> {
+  async register({ user: userEntity, response }): Promise<AuthResponseDto> {
     const defaultUser = {
       name: '',
     }
@@ -51,6 +46,12 @@ export class AuthService {
       ...defaultUser,
       ...userEntity,
       password: hashPassword,
+    })
+
+    response.cookie(LOCAL_TOKEN, this.generateToken(user), {
+      secure: true, //--> SET TO TRUE ON PRODUCTION,
+      httpOnly: true,
+      sameSite: 'none',
     })
 
     return { user: this.getUserResponse(user), token: this.generateToken(user) }

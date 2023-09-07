@@ -18,8 +18,11 @@ export class AuthController {
   @ApiResponse({ status: 200, type: AuthResponseDto })
   @ApiBody({ type: LoginRequestDto })
   @ApiUnauthorizedResponse({ description: 'Неверные входные данные' })
-  public login(@Body() user: LoginRequestDto): Promise<AuthResponseDto> {
-    return this.authService.login({ user })
+  public login(
+    @Body() user: LoginRequestDto,
+    @Res({ passthrough: true }) response: Response
+  ): Promise<AuthResponseDto> {
+    return this.authService.login({ user, response })
   }
 
   @Post('register')
@@ -27,8 +30,11 @@ export class AuthController {
   @ApiResponse({ status: 201, type: AuthResponseDto })
   @ApiBody({ type: RegisterRequestDto })
   @ApiUnauthorizedResponse({ description: 'Неверные входные данные' })
-  public register(@Body() user: RegisterRequestDto): Promise<AuthResponseDto> {
-    return this.authService.register({ user })
+  public register(
+    @Body() user: RegisterRequestDto,
+    @Res({ passthrough: true }) response: Response
+  ): Promise<AuthResponseDto> {
+    return this.authService.register({ user, response })
   }
 
   @Get('logout')
