@@ -22,6 +22,10 @@ export class TaskStatusEntity implements ITaskStatus {
   @IsNumber()
   position: number
 
+  @ApiProperty({ example: '1', description: 'ID доски' })
+  @IsNumber()
+  boardId: number
+
   @ApiProperty({ description: 'Задачи', type: [TaskDto] })
   tasks: TaskEntity[]
 }

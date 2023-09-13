@@ -3,12 +3,8 @@ export interface ITask {
   title: string
   description: string
   statusId: number
-}
-
-export interface ITaskPosition {
-  id: number
-  taskId: number
-  value: number
+  position: number
+  linkBoardId: number | null
 }
 
 export interface ITaskStatusTask {

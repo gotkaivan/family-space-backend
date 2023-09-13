@@ -3,7 +3,6 @@ import { IsString, IsNumber } from 'class-validator'
 import { ITask } from '../types'
 import { SubtaskEntity } from '../../subtask/entity/subtask.entity'
 import { SubtaskDto } from '../../subtask/dto/subtask.dto'
-import { TaskPositionEntity } from './task-position.entity'
 
 export class TaskEntity implements ITask {
   @ApiProperty({ example: 'id', description: 'Идентификатор задачи' })
@@ -28,4 +27,7 @@ export class TaskEntity implements ITask {
   @ApiProperty({ description: '1', example: 'Позиция задачи' })
   @IsNumber()
   readonly position: number
+
+  @ApiProperty({ description: '1', example: 'ID доски канбан', nullable: true })
+  readonly linkBoardId: number | null
 }

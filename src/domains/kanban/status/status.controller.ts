@@ -19,9 +19,9 @@ export class StatusController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Получение всех статусов' })
   @ApiResponse({ status: 200, type: [TaskStatusDto] })
-  @Get('all')
-  public async getStatuses(@Req() request: Request): Promise<TaskStatusDto[]> {
-    return this.taskStatusService.getTaskStatuses(getTokenByRequest(request))
+  @Get('all/:id')
+  public async getStatuses(@Param('id') id: number, @Req() request: Request): Promise<TaskStatusDto[]> {
+    return this.taskStatusService.getTaskStatuses(getTokenByRequest(request), id)
   }
 
   @UseGuards(JwtAuthGuard)

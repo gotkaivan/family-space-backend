@@ -16,7 +16,7 @@ export class TaskStatusService {
     private userService: UsersService
   ) {}
 
-  async getTaskStatuses(accessToken: string): Promise<TaskStatusDto[]> {
+  async getTaskStatuses(accessToken: string, boardId: number): Promise<TaskStatusDto[]> {
     try {
       const { id } = await this.userService.getUserByToken(accessToken)
       const response = await this.taskStatusRepository.findAll({
@@ -28,7 +28,7 @@ export class TaskStatusService {
         include: [
           {
             association: 'tasks',
-            attributes: ['id', 'title', 'description', 'statusId', 'position'],
+            attributes: ['id', 'title', 'description', 'statusId', 'position', 'linkBoardId'],
             include: [
               {
                 attributes: ['id', 'content', 'isCompleted', 'position', 'taskId'],
@@ -41,6 +41,13 @@ export class TaskStatusService {
             association: 'user',
             where: {
               id,
+            },
+          },
+          {
+            attributes: ['id'],
+            association: 'board',
+            where: {
+              id: boardId,
             },
           },
         ],

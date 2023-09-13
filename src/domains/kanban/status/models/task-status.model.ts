@@ -1,11 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { BelongsToMany, Column, DataType, HasMany, HasOne, Model, Table } from 'sequelize-typescript'
+import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript'
 import { UserModel } from 'src/domains/users/user.model'
 import { UserEntity } from 'src/domains/users/entity/user.entity'
 import { UserTaskStatusModel } from './user-task-status.model'
 import { CreateTaskStatusDto } from '../dto/request/create-task-status.dto'
 import { TaskEntity } from '../../task/entity/task.entity'
 import { TaskModel } from '../../task/models/task.model'
+import { BoardModel } from '../../task-board/models/board.model'
+import { BoardEntity } from '../../task-board/entity/board.entity'
 
 @Table({ tableName: 'task-statuses' })
 export class TaskStatusModel extends Model<TaskStatusModel, CreateTaskStatusDto> {
@@ -32,6 +34,14 @@ export class TaskStatusModel extends Model<TaskStatusModel, CreateTaskStatusDto>
 
   @BelongsToMany(() => UserModel, () => UserTaskStatusModel)
   user: UserEntity[]
+
+  @ForeignKey(() => BoardModel)
+  @ApiProperty({ example: '1', description: 'ID статуса' })
+  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 1 })
+  boardId: number
+
+  @BelongsTo(() => BoardModel)
+  board: BoardEntity
 
   @HasMany(() => TaskModel)
   tasks: TaskEntity[]

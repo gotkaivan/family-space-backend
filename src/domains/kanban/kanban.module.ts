@@ -14,11 +14,17 @@ import { SubtaskUserModel } from './subtask/models/subtask-user.model'
 import { TaskStatusModel } from './status/models/task-status.model'
 import { UserTaskStatusModel } from './status/models/user-task-status.model'
 import { TaskStatusService } from './status/status.service'
+import { BoardController } from './task-board/board.controller'
+import { BoardService } from './task-board/board.service'
+import { BoardModel } from './task-board/models/board.model'
+import { BoardUserModel } from './task-board/models/board-user.model'
 
 @Module({
-  controllers: [TaskController, SubtaskController, StatusController],
+  controllers: [TaskController, BoardController, SubtaskController, StatusController],
   imports: [
     SequelizeModule.forFeature([
+      BoardUserModel,
+      BoardModel,
       TaskStatusModel,
       TaskModel,
       TaskUserModel,
@@ -26,8 +32,10 @@ import { TaskStatusService } from './status/status.service'
       SubtaskUserModel,
       UserTaskStatusModel,
       UserModel,
+      BoardModel,
+      BoardUserModel,
     ]),
   ],
-  providers: [TaskService, TaskStatusService, SubtaskService, UsersService],
+  providers: [TaskService, TaskStatusService, SubtaskService, UsersService, BoardService],
 })
 export class TaskModule {}

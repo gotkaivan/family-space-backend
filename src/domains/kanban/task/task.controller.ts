@@ -21,7 +21,7 @@ export class TaskController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Получение всех колонок по ID колонки' })
   @ApiResponse({ status: 200, type: [TaskDto] })
-  @Get('all/:id')
+  @Get(':id')
   public async getTasks(@Param('id') id: number, @Req() request: Request): Promise<TaskDto[]> {
     return this.taskService.getTasks(getTokenByRequest(request), id)
   }
@@ -30,7 +30,7 @@ export class TaskController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Получение задачи' })
   @ApiResponse({ status: 200, type: TaskDto })
-  @Get(':id')
+  @Get('task/:id')
   public async getTaskById(@Param('id') id: number, @Req() request: Request): Promise<TaskDto> {
     return this.taskService.getTaskById(getTokenByRequest(request), id)
   }

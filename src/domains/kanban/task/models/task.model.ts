@@ -47,6 +47,10 @@ export class TaskModel extends Model<TaskModel, CreateTaskDto> {
   @Column({ type: DataType.INTEGER, allowNull: false })
   position: number
 
+  @ApiProperty({ example: '1', description: 'ИД канбан доски' })
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  linkBoardId: number | null
+
   @BelongsToMany(() => UserModel, () => TaskUserModel)
   user: UserEntity[]
 
