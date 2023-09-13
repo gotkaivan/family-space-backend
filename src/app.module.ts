@@ -22,7 +22,7 @@ import { TaskModule } from './domains/kanban/kanban.module'
       database: 'family',
       models: [UserModel],
       autoLoadModels: true,
-      sync: { force: false },
+      sync: { force: true },
     }),
     AuthModule,
     UsersModule,
