@@ -4,7 +4,7 @@ import { UserModel } from 'src/domains/users/user.model'
 import { BoardModel } from './board.model'
 import { AttachBoardToUser } from '../dto/request/attach-board-to-user'
 
-@Table({ tableName: 'user-board', createdAt: false, updatedAt: false })
+@Table({ tableName: 'board-users', createdAt: false, updatedAt: false })
 export class BoardUserModel extends Model<BoardUserModel, AttachBoardToUser> {
   @ApiProperty({ example: 1, description: 'Уникальный идентификатор' })
   @Column({

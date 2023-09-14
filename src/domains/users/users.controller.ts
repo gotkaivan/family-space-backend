@@ -1,11 +1,9 @@
 import { Controller, Get, UseGuards, Req, Patch, Param, Body, Post } from '@nestjs/common'
-import { ApiOperation, ApiResponse, ApiTags, ApiCookieAuth, ApiBearerAuth } from '@nestjs/swagger'
+import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger'
 import { JwtAuthGuard } from 'src/domains/auth/guards/jwt-auth.guard'
-import { UserModel } from './user.model'
 import { UsersService } from './users.service'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UserDto } from './dto/user.dto'
-import { TokenDtoRequest } from './dto/by-token-request.dto'
 import { getTokenByRequest } from 'src/helpers'
 import { Request } from 'express'
 

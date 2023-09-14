@@ -4,7 +4,7 @@ import { UserModel } from 'src/domains/users/user.model'
 import { SubtaskModel } from './subtask.model'
 import { AttachSubtaskToUser } from '../dto/request/attach-subtask-to-user'
 
-@Table({ tableName: 'user-subtasks', createdAt: false, updatedAt: false })
+@Table({ tableName: 'subtask-users', createdAt: false, updatedAt: false })
 export class SubtaskUserModel extends Model<SubtaskUserModel, AttachSubtaskToUser> {
   @ApiProperty({ example: 1, description: 'Уникальный идентификатор' })
   @Column({

@@ -7,6 +7,7 @@ import { UpdateTaskDto } from './dto/request/update-task.dto'
 import { TaskUserModel } from './models/task-user.model'
 import { AttachTaskToUser } from './dto/request/attach-task-to-user'
 import { TaskDto } from './dto/task.dto'
+import { getBadRequest } from 'src/helpers'
 
 @Injectable()
 export class TaskService {
@@ -15,6 +16,13 @@ export class TaskService {
     @InjectModel(TaskUserModel) private userTaskRepository: typeof TaskUserModel,
     private userService: UsersService
   ) {}
+
+  /**
+   * Метод получения задач по ID статуса
+   * @param accessToken string
+   * @param  statusId number
+   * @returns Promise<TaskDto[]>
+   */
 
   async getTasks(accessToken: string, statusId: number): Promise<TaskDto[]> {
     try {
@@ -40,6 +48,13 @@ export class TaskService {
     }
   }
 
+  /**
+   * Метод получения задачи по ID
+   * @param accessToken string
+   * @param  id number
+   * @returns Promise<TaskDto>
+   */
+
   async getTaskById(accessToken: string, id: number): Promise<TaskDto> {
     try {
       const user = await this.userService.getUserByToken(accessToken)
@@ -62,6 +77,13 @@ export class TaskService {
     }
   }
 
+  /**
+   * Метод создания задачи
+   * @param accessToken string
+   * @param  task CreateTaskDto
+   * @returns Promise<TaskDto>
+   */
+
   async createTask(accessToken: string, task: CreateTaskDto): Promise<TaskDto> {
     try {
       const { id: userId } = await this.userService.getUserByToken(accessToken)
@@ -69,19 +91,31 @@ export class TaskService {
       await this.attachTaskToUser({ userId, taskId })
       return this.getTaskById(accessToken, taskId)
     } catch (e) {
-      throw new HttpException('Не удалось создать задачу', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось создать задачу')
     }
   }
+
+  /**
+   * Метод обновления задачи
+   * @param accessToken string
+   * @param  task UpdateTaskDto
+   * @returns Promise<TaskDto>
+   */
 
   async updateTask(accessToken: string, task: UpdateTaskDto): Promise<TaskDto> {
     try {
       await this.taskRepository.update({ ...task, position: Math.round(task.position) }, { where: { id: task.id } })
       return await this.getTaskById(accessToken, task.id)
     } catch (e) {
-      console.log(e)
-      throw new HttpException('Не удалось обновить задачу', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось обновить задачу')
     }
   }
+
+  /**
+   * Метод удаления задачи
+   * @param  id number
+   * @returns Promise<{ id: number }>
+   */
 
   async deleteTask(id: number): Promise<{ id: number }> {
     try {
@@ -99,16 +133,16 @@ export class TaskService {
 
       return { id: deletedId }
     } catch (e) {
-      throw new HttpException('Не удалось удалить задачу', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось удалить задачу')
     }
   }
 
   /**
-   * Добавление слова в набор
-   * @param word CreateGroupDictionaryDto
-   * @param request Request
+   * Метод закрепления задачи к пользователю
+   * @param  item AttachTaskToUser
    * @returns
    */
+
   private async attachTaskToUser(item: AttachTaskToUser) {
     try {
       return this.userTaskRepository.findOrCreate({
@@ -117,7 +151,7 @@ export class TaskService {
         defaults: item,
       })
     } catch (e) {
-      throw new HttpException('Не удалось прикрепить задачу к пользователю', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось прикрепить задачу к пользователю')
     }
   }
 }

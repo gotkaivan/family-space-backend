@@ -2,12 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { SubtaskModel } from './models/subtask.model'
 import { UsersService } from 'src/domains/users/users.service'
-import { SubtaskEntity } from './entity/subtask.entity'
 import { CreateSubtaskDto } from './dto/request/create-subtask.dto'
 import { UpdateSubtaskDto } from './dto/request/update-subtask.dto'
 import { AttachSubtaskToUser } from './dto/request/attach-subtask-to-user'
 import { SubtaskUserModel } from './models/subtask-user.model'
 import { SubtaskDto } from './dto/subtask.dto'
+import { getBadRequest } from 'src/helpers'
 
 @Injectable()
 export class SubtaskService {
@@ -16,6 +16,13 @@ export class SubtaskService {
     @InjectModel(SubtaskUserModel) private subtaskUserRepository: typeof SubtaskUserModel,
     private userService: UsersService
   ) {}
+
+  /**
+   * Метод получения подзадач по ID задачи
+   * @param accessToken string
+   * @param  taskId number
+   * @returns Promise<SubtaskDto[]>
+   */
 
   async getSubtasks(accessToken: string, taskId: number): Promise<SubtaskDto[]> {
     try {
@@ -42,6 +49,13 @@ export class SubtaskService {
     }
   }
 
+  /**
+   * Метод получения подзадачи по ID
+   * @param accessToken string
+   * @param  id number
+   * @returns Promise<SubtaskDto>
+   */
+
   async getSubtaskById(accessToken: string, id: number): Promise<SubtaskDto> {
     try {
       const user = await this.userService.getUserByToken(accessToken)
@@ -56,10 +70,16 @@ export class SubtaskService {
         where: { id },
       })
     } catch (e) {
-      console.log(e)
       throw new HttpException('Подзадача не найдена или пренадлежит другому пользователю', HttpStatus.NOT_FOUND)
     }
   }
+
+  /**
+   * Метод создания подзадачи
+   * @param accessToken string
+   * @param  subtask CreateSubtaskDto
+   * @returns Promise<SubtaskDto>
+   */
 
   async createSubtask(accessToken: string, subtask: CreateSubtaskDto): Promise<SubtaskDto> {
     try {
@@ -68,9 +88,16 @@ export class SubtaskService {
       await this.attachTaskToUser({ userId, subtaskId })
       return this.getSubtaskById(accessToken, subtaskId)
     } catch (e) {
-      throw new HttpException('Не удалось создать задачу', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось создать задачу')
     }
   }
+
+  /**
+   * Метод обновления подзадачи
+   * @param accessToken string
+   * @param  subtask UpdateSubtaskDto
+   * @returns Promise<SubtaskDto>
+   */
 
   async updateSubtask(accessToken: string, subtask: UpdateSubtaskDto): Promise<SubtaskDto> {
     const hasSubtask = await this.getSubtaskById(accessToken, subtask.id)
@@ -83,9 +110,15 @@ export class SubtaskService {
       }
       return this.getSubtaskById(accessToken, subtask.id)
     } catch (e) {
-      throw new HttpException('Не удалось обновить подзадачу', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось обновить подзадачу')
     }
   }
+
+  /**
+   * Метод удаления подзадачи
+   * @param id number
+   * @returns Promise<{ id: number }>
+   */
 
   async deleteSubtask(id: number): Promise<{ id: number }> {
     try {
@@ -97,14 +130,13 @@ export class SubtaskService {
 
       return { id }
     } catch (e) {
-      throw new HttpException('Подзадача не найдена', HttpStatus.BAD_REQUEST)
+      getBadRequest('Подзадача не найдена')
     }
   }
 
   /**
-   * Добавление слова в набор
-   * @param word CreateGroupDictionaryDto
-   * @param request Request
+   * Метод прикрепления подзадачи к пользователю
+   * @param item AttachSubtaskToUser
    * @returns
    */
   private async attachTaskToUser(item: AttachSubtaskToUser) {
@@ -114,7 +146,7 @@ export class SubtaskService {
         defaults: item,
       })
     } catch (e) {
-      throw new HttpException('Не удалось прикрепить задачу к пользователю', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось прикрепить задачу к пользователю')
     }
   }
 }

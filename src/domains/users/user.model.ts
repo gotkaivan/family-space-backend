@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { BelongsToMany, Column, DataType, Model, Table } from 'sequelize-typescript'
+import { Column, DataType, Model, Table } from 'sequelize-typescript'
 import { IUser } from './types'
 
-@Table({ tableName: 'users' })
+@Table({ tableName: 'users', createdAt: 'created', updatedAt: 'updated' })
 export class UserModel extends Model<UserModel, IUser> {
   @ApiProperty({ description: 'Уникальный идентификатор' })
   @Column({

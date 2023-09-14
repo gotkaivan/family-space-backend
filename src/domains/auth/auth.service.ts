@@ -3,35 +3,49 @@ import { JwtService } from '@nestjs/jwt'
 import { UsersService } from 'src/domains/users/users.service'
 import * as bcrypt from 'bcryptjs'
 import { LoginRequestDto } from './dto/login-request.dto'
-import { AuthResponseDto } from './dto/auth-response.dto'
 import { LOCAL_TOKEN } from 'src/configs'
 import { UserEntity } from '../users/entity/user.entity'
-import { IUser } from '../users/types'
+import { UserDto } from '../users/dto/user.dto'
 
 @Injectable()
 export class AuthService {
   constructor(private userService: UsersService, private jwtService: JwtService) {}
 
-  async login({ user: userEntity, response }): Promise<AuthResponseDto> {
+  /**
+   * Метод аутентификации пользователя
+   * @param user UserEntity
+   * @param response Response
+   * @returns Promise<AuthResponseDto>
+   */
+
+  async login({ user: userEntity, response }): Promise<UserDto> {
     const user = await this.validateUser(userEntity)
 
     if (user) {
       response.cookie(LOCAL_TOKEN, this.generateToken(user), {
-        secure: true, //--> SET TO TRUE ON PRODUCTION,
+        secure: true,
         sameSite: 'none',
         httpOnly: true,
       })
     }
 
-    return { user: this.getUserResponse(user), token: this.generateToken(user) }
+    return this.getUserResponse(user)
   }
 
-  async register({ user: userEntity, response }): Promise<AuthResponseDto> {
+  /**
+   * Метод регистрации пользователя
+   * @param user UserEntity
+   * @param response Response
+   * @returns Promise<AuthResponseDto>
+   */
+
+  async register({ user: userEntity, response }): Promise<UserDto> {
     const defaultUser = {
       name: '',
     }
 
     const isUserFound = await this.userService.checkUniqueUser(userEntity.email)
+
     if (isUserFound) {
       throw new HttpException(
         { message: 'Пользователь с таким логином или e-mail уже существует' },
@@ -49,26 +63,43 @@ export class AuthService {
     })
 
     response.cookie(LOCAL_TOKEN, this.generateToken(user), {
-      secure: true, //--> SET TO TRUE ON PRODUCTION,
+      secure: true,
       httpOnly: true,
       sameSite: 'none',
     })
 
-    return { user: this.getUserResponse(user), token: this.generateToken(user) }
+    return user
   }
+
+  /**
+   * Метод разлогирования пользователя
+   * @returns Promise<void>
+   */
 
   async logout(response): Promise<void> {
     response.cookie('jwt', '', { expires: new Date() })
-    return
   }
 
-  private generateToken(user) {
+  /**
+   * Метод генерации токена
+   * @param user UserEntity
+   * @returns string
+   */
+
+  private generateToken(user: UserDto): string {
     const payload = { email: user.email }
     return this.jwtService.sign(payload)
   }
 
+  /**
+   * Метод валидации пользователя
+   * @param userDto LoginRequestDto
+   * @returns Promise<UserEntity>
+   */
+
   async validateUser(userDto: LoginRequestDto): Promise<UserEntity> {
     const user = await this.userService.getUserByEmail(userDto.email)
+
     if (!user) throw new UnauthorizedException({ message: 'Email не найден' })
 
     const passwordEquals = await bcrypt.compare(userDto.password, user.password)
@@ -79,7 +110,13 @@ export class AuthService {
     })
   }
 
-  private getUserResponse(user: UserEntity): IUser {
+  /**
+   * Вспомогательный метод формирования пользователя без пароля
+   * @param user UserEntity
+   * @returns UserDto
+   */
+
+  private getUserResponse(user: UserEntity): UserDto {
     return {
       id: user.id,
       name: user.name,

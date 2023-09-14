@@ -1,7 +1,9 @@
-import { Controller } from '@nestjs/common';
-import { InvestmentService } from './investment.service';
+import { Controller } from '@nestjs/common'
+import { InvestmentService } from './investment.service'
+import { ApiTags } from '@nestjs/swagger'
 
-@Controller('investment')
+@Controller('investments')
+@ApiTags('Инвестирование')
 export class InvestmentController {
   constructor(private readonly investmentService: InvestmentService) {}
 }

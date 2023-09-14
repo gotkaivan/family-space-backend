@@ -7,7 +7,7 @@ import { TaskStatusEntity } from '../../status/entity/task-status.entity'
 import { CreateBoardDto } from '../dto/request/create-board.dto'
 import { BoardUserModel } from './board-user.model'
 
-@Table({ tableName: 'boards' })
+@Table({ tableName: 'boards', createdAt: 'created', updatedAt: 'updated' })
 export class BoardModel extends Model<BoardModel, CreateBoardDto> {
   @ApiProperty({ description: 'Уникальный идентификатор' })
   @Column({

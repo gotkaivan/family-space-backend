@@ -4,7 +4,7 @@ import { UserModel } from 'src/domains/users/user.model'
 import { TaskModel } from './task.model'
 import { AttachTaskToUser } from '../dto/request/attach-task-to-user'
 
-@Table({ tableName: 'user-tasks', createdAt: false, updatedAt: false })
+@Table({ tableName: 'task-users', createdAt: false, updatedAt: false })
 export class TaskUserModel extends Model<TaskUserModel, AttachTaskToUser> {
   @ApiProperty({ example: 1, description: 'Уникальный идентификатор' })
   @Column({

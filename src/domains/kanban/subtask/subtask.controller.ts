@@ -7,11 +7,10 @@ import { SubtaskDto } from './dto/subtask.dto'
 import { getTokenByRequest } from 'src/helpers'
 import { CreateSubtaskDto } from './dto/request/create-subtask.dto'
 import { UpdateSubtaskDto } from './dto/request/update-subtask.dto'
-import { CreateSubtaskResponseDto } from './dto/response/create-subtask.dto'
 import { UpdateSubtaskResponseDto } from './dto/response/update-subtask.dto'
 import { DeleteSubtaskResponseDto } from './dto/response/delete-subtask.dto'
 
-@Controller('subtask')
+@Controller('subtasks')
 @ApiTags('Subtask')
 export class SubtaskController {
   constructor(private subtaskService: SubtaskService) {

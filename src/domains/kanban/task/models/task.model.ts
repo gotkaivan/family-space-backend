@@ -19,7 +19,7 @@ import { SubtaskEntity } from '../../subtask/entity/subtask.entity'
 import { SubtaskModel } from '../../subtask/models/subtask.model'
 import { TaskStatusEntity } from '../../status/entity/task-status.entity'
 
-@Table({ tableName: 'tasks' })
+@Table({ tableName: 'tasks', createdAt: 'created', updatedAt: 'updated' })
 export class TaskModel extends Model<TaskModel, CreateTaskDto> {
   @ApiProperty({ description: 'Уникальный идентификатор' })
   @Column({

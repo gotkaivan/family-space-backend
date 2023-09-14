@@ -7,6 +7,7 @@ import { BoardDto } from './dto/task-group.dto'
 import { UpdateBoardDto } from './dto/request/update-board.dto'
 import { CreateBoardDto } from './dto/request/create-board.dto'
 import { BoardUserModel } from './models/board-user.model'
+import { getBadRequest } from 'src/helpers'
 
 @Injectable()
 export class BoardService {
@@ -16,7 +17,13 @@ export class BoardService {
     private userService: UsersService
   ) {}
 
-  async getTaskGroups(accessToken: string): Promise<BoardDto[]> {
+  /**
+   * Метод получения канбан досок
+   * @param accessToken string
+   * @returns Promise<BoardDto[]>
+   */
+
+  async getBoards(accessToken: string): Promise<BoardDto[]> {
     try {
       const { id } = await this.userService.getUserByToken(accessToken)
       return await this.boardRepository.findAll({
@@ -30,11 +37,18 @@ export class BoardService {
         ],
       })
     } catch (e) {
-      throw new HttpException('Группы не найдены или пренадлежат другому пользователю', HttpStatus.NOT_FOUND)
+      throw new HttpException('Доски не найдены или пренадлежат другому пользователю', HttpStatus.NOT_FOUND)
     }
   }
 
-  async getTaskGroupById(accessToken: string, id: number): Promise<BoardDto> {
+  /**
+   * Метод получения канбан доски по ID
+   * @param accessToken string
+   * @param id number
+   * @returns Promise<BoardDto>
+   */
+
+  async getBoardById(accessToken: string, id: number): Promise<BoardDto> {
     try {
       const user = await this.userService.getUserByToken(accessToken)
       return await this.boardRepository.findOne({
@@ -49,32 +63,51 @@ export class BoardService {
         where: { id },
       })
     } catch (e) {
-      throw new HttpException('Группа не найдена или пренадлежит другому пользователю', HttpStatus.NOT_FOUND)
+      throw new HttpException('Доска не найдена или пренадлежит другому пользователю', HttpStatus.NOT_FOUND)
     }
   }
 
-  async createTaskGroup(accessToken: string, group: CreateBoardDto): Promise<BoardDto> {
+  /**
+   * Метод создания канбан доски
+   * @param accessToken string
+   * @param board CreateBoardDto
+   * @returns Promise<BoardDto>
+   */
+
+  async createBoard(accessToken: string, board: CreateBoardDto): Promise<BoardDto> {
     try {
       const { id: userId } = await this.userService.getUserByToken(accessToken)
-      const { id: groupId } = await this.boardRepository.create({ ...group })
+      const { id: groupId } = await this.boardRepository.create({ ...board })
       await this.attachBoardToUser({ userId, groupId })
-      return this.getTaskGroupById(accessToken, groupId)
+      return this.getBoardById(accessToken, groupId)
     } catch (e) {
-      throw new HttpException('Не удалось создать задачу', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось создать доску')
     }
   }
 
-  async updateTask(accessToken: string, group: UpdateBoardDto): Promise<BoardDto> {
+  /**
+   * Метод создания канбан доски
+   * @param accessToken string
+   * @param board CreateBoardDto
+   * @returns Promise<BoardDto>
+   */
+
+  async updateBoard(accessToken: string, board: UpdateBoardDto): Promise<BoardDto> {
     try {
-      await this.boardRepository.update({ ...group, position: Math.round(group.position) }, { where: { id: group.id } })
-      return await this.getTaskGroupById(accessToken, group.id)
+      await this.boardRepository.update({ ...board, position: Math.round(board.position) }, { where: { id: board.id } })
+      return await this.getBoardById(accessToken, board.id)
     } catch (e) {
-      console.log(e)
-      throw new HttpException('Не удалось обновить задачу', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось обновить доску')
     }
   }
 
-  async deleteTaskGroup(id: number): Promise<{ id: number }> {
+  /**
+   * Метод удаления канбан доски
+   * @param id number
+   * @returns Promise<{ id: numebr }>
+   */
+
+  async deleteBoard(id: number): Promise<{ id: number }> {
     try {
       const deletedId = await this.boardRepository.destroy({
         where: {
@@ -90,16 +123,16 @@ export class BoardService {
 
       return { id: deletedId }
     } catch (e) {
-      throw new HttpException('Не удалось удалить задачу', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось удалить задачу')
     }
   }
 
   /**
-   * Добавление слова в набор
-   * @param word CreateGroupDictionaryDto
-   * @param request Request
+   * Метод прикрепления доски к пользователю
+   * @param item AttachBoardToUser
    * @returns
    */
+
   private async attachBoardToUser(item: AttachBoardToUser) {
     try {
       return this.userBoardRepository.findOrCreate({
@@ -108,7 +141,7 @@ export class BoardService {
         defaults: item,
       })
     } catch (e) {
-      throw new HttpException('Не удалось прикрепить группу к пользователю', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось прикрепить группу к пользователю')
     }
   }
 }

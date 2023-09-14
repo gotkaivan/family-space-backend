@@ -7,6 +7,7 @@ import { TaskStatusModel } from './models/task-status.model'
 import { CreateTaskStatusDto } from './dto/request/create-task-status.dto'
 import { UpdateTaskStatusDto } from './dto/request/update-task-status.dto'
 import { AttachTaskStatusToUserDto } from './dto/request/attach-task-status-to-user.dto'
+import { getBadRequest } from 'src/helpers'
 
 @Injectable()
 export class TaskStatusService {
@@ -15,6 +16,13 @@ export class TaskStatusService {
     @InjectModel(UserTaskStatusModel) private userTaskStatusRepository: typeof UserTaskStatusModel,
     private userService: UsersService
   ) {}
+
+  /**
+   * Метод получения статусов по ID доски
+   * @param accessToken string
+   * @param boardId number
+   * @returns Promise<TaskStatusDto[]>
+   */
 
   async getTaskStatuses(accessToken: string, boardId: number): Promise<TaskStatusDto[]> {
     try {
@@ -58,6 +66,13 @@ export class TaskStatusService {
     }
   }
 
+  /**
+   * Метод получения статуса по ID статуса
+   * @param accessToken string
+   * @param id number
+   * @returns Promise<TaskStatusDto>
+   */
+
   async getTaskStatusById(accessToken: string, id: number): Promise<TaskStatusDto> {
     try {
       const user = await this.userService.getUserByToken(accessToken)
@@ -71,24 +86,39 @@ export class TaskStatusService {
         },
       })
       if (status) return status
-      throw new Error()
-    } catch (e) {
       throw new HttpException('Статус не найден или пренадлежит другому пользователю', HttpStatus.NOT_FOUND)
+    } catch (e) {
+      getBadRequest('Статус не найден')
     }
   }
+
+  /**
+   * Метод создания статуса
+   * @param accessToken string
+   * @param status CreateTaskStatusDto
+   * @returns Promise<TaskStatusDto>
+   */
 
   async createTaskStatus(accessToken, status: CreateTaskStatusDto): Promise<TaskStatusDto> {
     try {
       const { id: userId } = await this.userService.getUserByToken(accessToken)
+
       const { id: statusId } = await this.taskStatusRepository.create(status)
+
       await this.attachTaskStatusToUser({ userId, statusId })
 
       return this.getTaskStatusById(accessToken, statusId)
     } catch (e) {
-      console.log(e)
-      throw new HttpException('Не удалось создать статус', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось создать статус')
     }
   }
+
+  /**
+   * Метод обновления статуса
+   * @param accessToken string
+   * @param status UpdateTaskStatusDto
+   * @returns Promise<TaskStatusDto>
+   */
 
   async updateTaskStatus(accessToken: string, status: UpdateTaskStatusDto): Promise<TaskStatusDto> {
     try {
@@ -98,9 +128,15 @@ export class TaskStatusService {
       )
       return this.getTaskStatusById(accessToken, status.id)
     } catch (e) {
-      throw new HttpException('Не удалось обновить статус', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось обновить статус')
     }
   }
+
+  /**
+   * Метод удаления статуса
+   * @param id number
+   * @returns Promise<{ id: number }>
+   */
 
   async deleteTaskStatus(id: number): Promise<{ id: number }> {
     try {
@@ -118,16 +154,16 @@ export class TaskStatusService {
 
       return { id: deletedId }
     } catch (e) {
-      throw new HttpException('Не удалось удалить статус', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось удалить статус')
     }
   }
 
   /**
    * Добавление слова в набор
-   * @param word CreateGroupDictionaryDto
-   * @param request Request
+   * @param item AttachTaskStatusToUserDto
    * @returns
    */
+
   private async attachTaskStatusToUser(item: AttachTaskStatusToUserDto) {
     try {
       return this.userTaskStatusRepository.findOrCreate({
@@ -136,7 +172,7 @@ export class TaskStatusService {
         defaults: item,
       })
     } catch (e) {
-      throw new HttpException('Не удалось прикрепить статус к пользователю', HttpStatus.BAD_REQUEST)
+      getBadRequest('Не удалось прикрепить статус к пользователю')
     }
   }
 }

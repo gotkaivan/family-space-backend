@@ -23,7 +23,7 @@ export class BoardController {
   @ApiResponse({ status: 200, type: [BoardDto] })
   @Get()
   public async getBoards(@Req() request: Request): Promise<BoardDto[]> {
-    return this.boardService.getTaskGroups(getTokenByRequest(request))
+    return this.boardService.getBoards(getTokenByRequest(request))
   }
 
   @UseGuards(JwtAuthGuard)
@@ -32,7 +32,7 @@ export class BoardController {
   @ApiResponse({ status: 200, type: BoardDto })
   @Get(':id')
   public async getBoardById(@Param('id') id: number, @Req() request: Request): Promise<BoardDto> {
-    return this.boardService.getTaskGroupById(getTokenByRequest(request), id)
+    return this.boardService.getBoardById(getTokenByRequest(request), id)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -41,7 +41,7 @@ export class BoardController {
   @ApiResponse({ status: 201, type: BoardDto })
   @Post('create')
   public async createBoard(@Body() task: CreateBoardDto, @Req() request: Request): Promise<CreateBoardResponseDto> {
-    return this.boardService.createTaskGroup(getTokenByRequest(request), task)
+    return this.boardService.createBoard(getTokenByRequest(request), task)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -50,7 +50,7 @@ export class BoardController {
   @ApiResponse({ status: 200, type: BoardDto })
   @Patch()
   updateBoard(@Body() task: BoardDto, @Req() request: Request): Promise<UpdateBoardResponseDto> {
-    return this.boardService.updateTask(getTokenByRequest(request), task)
+    return this.boardService.updateBoard(getTokenByRequest(request), task)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -59,6 +59,6 @@ export class BoardController {
   @ApiResponse({ status: 200, type: DeleteBoardResponseDto })
   @Delete(':id')
   deleteBoard(@Param('id') id: number): Promise<DeleteBoardResponseDto> {
-    return this.boardService.deleteTaskGroup(id)
+    return this.boardService.deleteBoard(id)
   }
 }

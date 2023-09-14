@@ -9,7 +9,7 @@ import { TaskModel } from '../../task/models/task.model'
 import { BoardModel } from '../../task-board/models/board.model'
 import { BoardEntity } from '../../task-board/entity/board.entity'
 
-@Table({ tableName: 'task-statuses' })
+@Table({ tableName: 'task-statuses', createdAt: 'created', updatedAt: 'updated' })
 export class TaskStatusModel extends Model<TaskStatusModel, CreateTaskStatusDto> {
   @ApiProperty({ description: 'Уникальный идентификатор' })
   @Column({

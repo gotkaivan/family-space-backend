@@ -9,11 +9,12 @@ const getHttpsOptions = () => {
   try {
     return {
       httpsOptions: {
-        key: fs.readFileSync('/var/www/httpd-cert/api-fincome.space_2023-09-06-11-25_07.key'),
-        cert: fs.readFileSync('/var/www/httpd-cert/api-fincome.space_2023-09-06-11-25_07.crt'),
+        key: fs.readFileSync(process.env.HTTPS_KEY),
+        cert: fs.readFileSync(process.env.HTTPS_CRT),
       },
     }
   } catch (e) {
+    console.log('Не удалось получить ssh ключи')
     return {}
   }
 }

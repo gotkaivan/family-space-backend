@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
-import { ISubTask } from '../types'
 import { UserModel } from 'src/domains/users/user.model'
 import { TaskModel } from '../../task/models/task.model'
 import { SubtaskUserModel } from './subtask-user.model'
@@ -8,7 +7,7 @@ import { UserEntity } from 'src/domains/users/entity/user.entity'
 import { TaskEntity } from '../../task/entity/task.entity'
 import { CreateSubtaskDto } from '../dto/request/create-subtask.dto'
 
-@Table({ tableName: 'subtasks' })
+@Table({ tableName: 'subtasks', createdAt: 'created', updatedAt: 'updated' })
 export class SubtaskModel extends Model<SubtaskModel, CreateSubtaskDto> {
   @ApiProperty({ description: 'Уникальный идентификатор' })
   @Column({

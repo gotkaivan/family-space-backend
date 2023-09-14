@@ -11,18 +11,18 @@ import { TaskModule } from './domains/kanban/kanban.module'
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.${process.env.NODE_ENV}.env`,
+      envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'family',
-      password: '43081',
-      database: 'family',
+      host: process.env.POSTGRES_HOST,
+      port: Number(process.env.POSTGRES_PORT),
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
       models: [UserModel],
       autoLoadModels: true,
-      sync: { force: true },
+      sync: { force: false },
     }),
     AuthModule,
     UsersModule,
