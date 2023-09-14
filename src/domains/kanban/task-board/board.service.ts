@@ -27,6 +27,7 @@ export class BoardService {
     try {
       const { id } = await this.userService.getUserByToken(accessToken)
       return await this.boardRepository.findAll({
+        order: [['id', 'ASC']],
         include: [
           {
             attributes: [],
