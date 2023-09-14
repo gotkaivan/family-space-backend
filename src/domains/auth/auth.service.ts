@@ -56,11 +56,13 @@ export class AuthService {
     const salt = bcrypt.genSaltSync(10)
     const hashPassword = await bcrypt.hashSync(userEntity.password, salt)
 
-    const user = await this.userService.createUser({
+    await this.userService.createUser({
       ...defaultUser,
       ...userEntity,
       password: hashPassword,
     })
+
+    const user = await this.userService.getUserByEmail(userEntity.email)
 
     response.cookie(LOCAL_TOKEN, this.generateToken(user), {
       secure: true,
