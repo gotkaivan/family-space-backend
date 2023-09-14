@@ -102,9 +102,9 @@ export class SubtaskService {
   async updateSubtask(accessToken: string, subtask: UpdateSubtaskDto): Promise<SubtaskDto> {
     const hasSubtask = await this.getSubtaskById(accessToken, subtask.id)
     try {
-      if (!hasSubtask) {
-        const { id, ...other } = subtask
-        await this.createSubtask(accessToken, other)
+      if (!subtask.id || !hasSubtask) {
+        const { id, ...subtaskWithoutId } = subtask
+        await this.createSubtask(accessToken, subtaskWithoutId)
       } else {
         await this.subtaskRepository.update({ ...subtask }, { where: { id: subtask.id } })
       }
