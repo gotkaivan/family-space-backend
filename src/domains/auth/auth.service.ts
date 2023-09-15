@@ -24,9 +24,9 @@ export class AuthService {
     if (user) {
       response.cookie(LOCAL_TOKEN, this.generateToken(user), {
         secure: true,
-        domain: '.fincome.space',
         sameSite: 'none',
-        httpOnly: false,
+        domain: 'fincome.space',
+        httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
       })
     }
@@ -68,9 +68,9 @@ export class AuthService {
 
     response.cookie(LOCAL_TOKEN, this.generateToken(user), {
       secure: true,
-      httpOnly: false,
-      domain: '.fincome.space',
+      httpOnly: true,
       sameSite: 'none',
+      domain: 'fincome.space',
       maxAge: 24 * 60 * 60 * 1000,
     })
 
