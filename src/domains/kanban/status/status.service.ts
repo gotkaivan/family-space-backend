@@ -39,7 +39,7 @@ export class TaskStatusService {
             attributes: ['id', 'title', 'description', 'statusId', 'position', 'linkBoardId'],
             include: [
               {
-                attributes: ['id', 'content', 'isCompleted', 'position', 'taskId'],
+                attributes: ['id', 'title', 'description', 'isCompleted', 'position', 'taskId'],
                 association: 'subtasks',
               },
             ],
@@ -62,6 +62,7 @@ export class TaskStatusService {
       })
       return response
     } catch (e) {
+      console.log(e)
       throw new HttpException('Статусы не найдены или пренадлежат другому пользователю', HttpStatus.NOT_FOUND)
     }
   }
