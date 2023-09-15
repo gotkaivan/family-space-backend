@@ -7,9 +7,13 @@ export class SubtaskEntity implements ISubTask {
   @IsString({ message: '' })
   readonly id: number
 
-  @ApiProperty({ example: 'Контент подзадачи', description: 'Контент подзадачи' })
+  @ApiProperty({ example: 'Название подзадачи', description: 'Название подзадачи' })
   @IsString({ message: 'Должно быть строкой' })
-  readonly content: string
+  readonly title: string
+
+  @ApiProperty({ example: 'Описание подзадачи', description: 'Описание подзадачи' })
+  @IsString({ message: 'Должно быть строкой' })
+  readonly description: string
 
   @ApiProperty({ example: '1', description: 'Позиция подзадачи относительно других подзадач' })
   @IsNumber({}, { message: 'Должно быть числом' })

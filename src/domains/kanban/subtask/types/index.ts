@@ -1,7 +1,8 @@
 export interface ISubTask {
   id: number
   position: number
-  content: string
+  title: string
+  description: string
   taskId: number
   isCompleted: boolean
 }

@@ -18,9 +18,13 @@ export class SubtaskModel extends Model<SubtaskModel, CreateSubtaskDto> {
   })
   id: number
 
-  @ApiProperty({ example: 'Контент', description: 'Контент подзадачи' })
+  @ApiProperty({ example: 'Название подзадачи', description: 'Название подзадачи' })
   @Column({ type: DataType.STRING, allowNull: false, defaultValue: '' })
-  content: string
+  title: string
+
+  @ApiProperty({ example: 'Описание', description: 'Описание подзадачи' })
+  @Column({ type: DataType.STRING, allowNull: false, defaultValue: '' })
+  description: string
 
   @ApiProperty({ example: 'false', description: 'Признак завершенности подзадачи' })
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
