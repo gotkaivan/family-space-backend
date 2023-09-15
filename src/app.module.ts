@@ -22,7 +22,7 @@ import { TaskModule } from './domains/kanban/kanban.module'
       database: process.env.POSTGRES_DB,
       models: [UserModel],
       autoLoadModels: true,
-      sync: { force: true },
+      sync: { force: false },
     }),
     AuthModule,
     UsersModule,
