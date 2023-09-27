@@ -19,7 +19,7 @@ export class NotesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Получение заметок по ID набора' })
   @ApiResponse({ status: 200, type: [NoteDto] })
-  @Get(':id')
+  @Get('all/:id')
   public async getNotes(@Param('id') id: number, @Req() request: Request): Promise<NoteDto[]> {
     return this.notesService.getNotes(getTokenByRequest(request), id)
   }
@@ -28,7 +28,7 @@ export class NotesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Получение заметки по ID' })
   @ApiResponse({ status: 200, type: NoteDto })
-  @Get('note/:id')
+  @Get(':id')
   public async getNoteById(@Param('id') id: number, @Req() request: Request): Promise<NoteDto> {
     return this.notesService.getNoteById(getTokenByRequest(request), id)
   }
