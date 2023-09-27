@@ -62,7 +62,6 @@ export class TaskStatusService {
       })
       return response
     } catch (e) {
-      console.log(e)
       throw new HttpException('Статусы не найдены или пренадлежат другому пользователю', HttpStatus.NOT_FOUND)
     }
   }

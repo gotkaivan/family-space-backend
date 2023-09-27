@@ -7,6 +7,7 @@ import { UsersModule } from './domains/users/users.module'
 import { TransactionModule } from './domains/transaction/transaction.module'
 import { InvestmentModule } from './domains/investment/investment.module'
 import { TaskModule } from './domains/kanban/kanban.module'
+import { NotesModule } from './domains/notes/notes.module'
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TaskModule } from './domains/kanban/kanban.module'
     TransactionModule,
     InvestmentModule,
     TaskModule,
+    NotesModule,
   ],
   controllers: [],
   providers: [],
