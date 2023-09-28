@@ -41,5 +41,5 @@ export class TransactionEntity implements ITransaction {
 
   @ApiProperty({ example: '', description: 'Дата совершения транзакции' })
   @IsNumber()
-  readonly transactionDate: string
+  readonly transactionDate: string | null
 }
