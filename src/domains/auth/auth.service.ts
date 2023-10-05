@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt'
 import { UsersService } from 'src/domains/users/users.service'
 import * as bcrypt from 'bcryptjs'
 import { LoginRequestDto } from './dto/login-request.dto'
-import { LOCAL_TOKEN } from 'src/configs'
+import { LOCAL_TOKEN } from 'src/common/configs'
 import { UserEntity } from '../users/entity/user.entity'
 import { UserDto } from '../users/dto/user.dto'
 

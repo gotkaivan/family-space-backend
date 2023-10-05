@@ -25,7 +25,10 @@ export class TransactionModel extends Model<TransactionModel, CreateTransactionD
   @Column({ type: DataType.STRING, allowNull: false })
   description: string
 
-  @ApiProperty({ example: TRANSACTION_TYPES.INCOME__TRANSACTION__TYPE, description: 'Тип транзакции' })
+  @ApiProperty({
+    example: TRANSACTION_TYPES.INCOME__TRANSACTION__TYPE,
+    description: 'Тип транзакции',
+  })
   @Column({ type: DataType.STRING, allowNull: false })
   transactionType: TRANSACTION_TYPES
 
@@ -37,9 +40,9 @@ export class TransactionModel extends Model<TransactionModel, CreateTransactionD
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
   purchasePrice: number
 
-  @ApiProperty({ example: '0', description: 'Сколько должен денег' })
+  @ApiProperty({ example: '0', description: 'Сколько должен денег', required: false })
   @Column({ type: DataType.INTEGER, defaultValue: 0 })
-  owesPrice?: number
+  owesPrice: number
 
   @ApiProperty({ example: '7000', description: 'Текущая стоимость одной единицы' })
   @Column({ type: DataType.INTEGER, allowNull: false })
@@ -49,7 +52,7 @@ export class TransactionModel extends Model<TransactionModel, CreateTransactionD
   @Column({ type: DataType.INTEGER, allowNull: false })
   amount: number
 
-  @ApiProperty({ example: '', description: 'Дата совершения транзакции' })
+  @ApiProperty({ example: '', description: 'Дата совершения транзакции', nullable: true })
   @Column({ type: DataType.STRING, allowNull: true })
   transactionDate: string | null
 

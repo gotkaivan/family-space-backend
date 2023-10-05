@@ -15,11 +15,11 @@ export class TransactionEntity implements ITransaction {
   @IsString({ message: 'Должно быть строкой' })
   readonly description: string
 
-  @ApiProperty({ example: 'income', description: 'Тип транзакции' })
+  @ApiProperty({ example: 'income', description: 'Тип транзакции', enum: TRANSACTION_TYPES })
   @IsString({ message: 'Должно быть строкой' })
   readonly transactionType: TRANSACTION_TYPES
 
-  @ApiProperty({ example: 'EUR', description: 'Тип валюты' })
+  @ApiProperty({ example: 'EUR', description: 'Тип валюты', enum: CURRENCY_TYPE })
   @IsString({ message: 'Должно быть строкой' })
   readonly currencyType: CURRENCY_TYPE
 
@@ -27,7 +27,7 @@ export class TransactionEntity implements ITransaction {
   @IsNumber()
   readonly purchasePrice: number
 
-  @ApiProperty({ example: '0', description: 'Сколько должен денег' })
+  @ApiProperty({ example: '0', description: 'Сколько должен денег', required: false })
   @IsNumber()
   readonly owesPrice?: number
 
@@ -39,7 +39,7 @@ export class TransactionEntity implements ITransaction {
   @IsNumber()
   readonly amount: number
 
-  @ApiProperty({ example: '', description: 'Дата совершения транзакции' })
+  @ApiProperty({ example: '', description: 'Дата совершения транзакции', nullable: true })
   @IsNumber()
   readonly transactionDate: string | null
 }

@@ -2,7 +2,7 @@ import { Controller, UseGuards, Post, Req, Body, Delete, Patch, Param, Get } fro
 import { Request } from 'express'
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth, ApiBody } from '@nestjs/swagger'
 import { JwtAuthGuard } from 'src/domains/auth/guards/jwt-auth.guard'
-import { getTokenByRequest } from 'src/helpers'
+import { getTokenByRequest } from 'src/common/helpers'
 import { TaskStatusDto } from './dto/task-status.dto'
 import { CreateTaskStatusDto } from './dto/request/create-task-status.dto'
 import { TaskStatusService } from './status.service'

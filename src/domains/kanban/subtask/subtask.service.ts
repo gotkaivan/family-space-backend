@@ -7,7 +7,7 @@ import { UpdateSubtaskDto } from './dto/request/update-subtask.dto'
 import { AttachSubtaskToUser } from './dto/request/attach-subtask-to-user'
 import { SubtaskUserModel } from './models/subtask-user.model'
 import { SubtaskDto } from './dto/subtask.dto'
-import { getBadRequest } from 'src/helpers'
+import { getBadRequest } from 'src/common/helpers'
 
 @Injectable()
 export class SubtaskService {
@@ -142,7 +142,9 @@ export class SubtaskService {
   private async attachTaskToUser(item: AttachSubtaskToUser) {
     try {
       return this.subtaskUserRepository.findOrCreate({
-        where: item,
+        where: {
+          ...item,
+        },
         defaults: item,
       })
     } catch (e) {

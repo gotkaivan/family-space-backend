@@ -4,7 +4,7 @@ import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagg
 import { JwtAuthGuard } from 'src/domains/auth/guards/jwt-auth.guard'
 import { SubtaskService } from './subtask.service'
 import { SubtaskDto } from './dto/subtask.dto'
-import { getTokenByRequest } from 'src/helpers'
+import { getTokenByRequest } from 'src/common/helpers'
 import { CreateSubtaskDto } from './dto/request/create-subtask.dto'
 import { UpdateSubtaskDto } from './dto/request/update-subtask.dto'
 import { UpdateSubtaskResponseDto } from './dto/response/update-subtask.dto'

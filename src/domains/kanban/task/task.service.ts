@@ -7,7 +7,7 @@ import { UpdateTaskDto } from './dto/request/update-task.dto'
 import { TaskUserModel } from './models/task-user.model'
 import { AttachTaskToUser } from './dto/request/attach-task-to-user'
 import { TaskDto } from './dto/task.dto'
-import { getBadRequest } from 'src/helpers'
+import { getBadRequest } from 'src/common/helpers'
 
 @Injectable()
 export class TaskService {
@@ -147,7 +147,9 @@ export class TaskService {
     try {
       return this.userTaskRepository.findOrCreate({
         raw: true,
-        where: item,
+        where: {
+          ...item,
+        },
         defaults: item,
       })
     } catch (e) {

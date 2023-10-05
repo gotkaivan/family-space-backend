@@ -21,5 +21,17 @@ export interface ITransaction {
   owesPrice?: number
   currentPrice: number
   amount: number
-  transactionDate: string | null
+  transactionDate: string
+}
+
+export interface ITransactionFilterDate {
+  startDate: string
+  endDate: string
+}
+
+export interface ITransactionFilterOptions {
+  search?: string
+  currencyType?: CURRENCY_TYPE
+  transactionType?: TRANSACTION_TYPES
+  transactionDate?: ITransactionFilterDate
 }

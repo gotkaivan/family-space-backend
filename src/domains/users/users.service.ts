@@ -5,7 +5,7 @@ import { UserModel } from './user.model'
 import { UserEntity } from './entity/user.entity'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UserDto } from './dto/user.dto'
-import { getBadRequest } from 'src/helpers'
+import { getBadRequest } from 'src/common/helpers'
 
 import jwt_decode from 'jwt-decode'
 

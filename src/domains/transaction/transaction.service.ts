@@ -1,13 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { Op } from 'sequelize'
 import { InjectModel } from '@nestjs/sequelize'
 import { UsersService } from 'src/domains/users/users.service'
-import { getBadRequest } from 'src/helpers'
+import { getBadRequest } from 'src/common/helpers'
 import { TransactionModel } from './models/transaction.model'
 import { TransactionUserModel } from './models/transaction-user.model'
 import { TransactionDto } from './dto/transaction.dto'
 import { CreateTransactionDto } from './dto/request/create-transaction.dto'
 import { UpdateTransactionDto } from './dto/request/update-transaction.dto'
-import { AttachTransactionToUser } from './dto/request/attach-transaction-to-user'
+import { AttachTransactionToUser } from './dto/request/attach-transaction-to-user.dto'
+import { TransactionFiltersRequestDto } from './dto/request/transaction-filters-request.dto'
+import { TransactionRequestOptionsDto } from './dto/request/transaction-request-options.dto'
+import { GetTransactionsResponseDto } from './dto/response/get-transactions.dto'
 
 @Injectable()
 export class TransactionService {
@@ -23,11 +27,19 @@ export class TransactionService {
    * @returns Promise<TransactionDto[]>
    */
 
-  async getTransactions(accessToken: string): Promise<TransactionDto[]> {
+  async getTransactions(
+    accessToken: string,
+    options?: TransactionRequestOptionsDto
+  ): Promise<GetTransactionsResponseDto> {
     try {
       const { id } = await this.userService.getUserByToken(accessToken)
-      return await this.transactionRepository.findAll({
-        order: [['id', 'ASC']],
+
+      const filters = this.formatRequestFilters(options.filters)
+
+      const attributes = {
+        where: {
+          ...filters,
+        },
         include: [
           {
             attributes: [],
@@ -36,7 +48,21 @@ export class TransactionService {
             association: 'user',
           },
         ],
+      }
+
+      const total = await this.transactionRepository.count(attributes)
+
+      const items = await this.transactionRepository.findAll({
+        ...attributes,
+        limit: options.pagination.limit,
+        offset: (options.pagination.page - 1) * options.pagination.limit,
+        order: [['id', 'ASC']],
       })
+
+      return {
+        items,
+        total,
+      }
     } catch (e) {
       throw new HttpException('Транзакции не найдены или пренадлежат другому пользователю', HttpStatus.NOT_FOUND)
     }
@@ -82,6 +108,7 @@ export class TransactionService {
       await this.attachTransactionToUser({ userId, transactionId })
       return this.getTransactionById(accessToken, transactionId)
     } catch (e) {
+      console.log(e)
       getBadRequest('Не удалось создать транзакцию')
     }
   }
@@ -138,11 +165,41 @@ export class TransactionService {
     try {
       return this.transactionUserRepository.findOrCreate({
         raw: true,
-        where: item,
+        where: {
+          ...item,
+        },
         defaults: item,
       })
     } catch (e) {
       getBadRequest('Не удалось прикрепить транзакцию к пользователю')
     }
+  }
+
+  /**
+   * Метод прикрепления транзакции к пользователю
+   * @param item AttachTransactionToUser
+   * @returns
+   */
+
+  private formatRequestFilters(options: TransactionFiltersRequestDto | undefined) {
+    const response = {}
+    if (options.search) {
+      //@ts-ignore
+      response.title = {
+        [Op.iLike]: `%${options.search}%`,
+      }
+    }
+
+    //@ts-ignore
+    if (options.currencyType) response.currencyType = options.currencyType
+    //@ts-ignore
+    if (options.transactionType) response.transactionType = options.transactionType
+    if (options.transactionDate && !!options.transactionDate.startDate && !!options.transactionDate.endDate) {
+      //@ts-ignore
+      response.transactionDate = {
+        [Op.between]: [options.transactionDate.startDate, options.transactionDate.endDate],
+      }
+    }
+    return response
   }
 }

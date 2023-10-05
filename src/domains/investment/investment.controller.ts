@@ -4,7 +4,7 @@ import { InvestmentService } from './investment.service'
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { TransactionDto } from '../transaction/dto/transaction.dto'
-import { getTokenByRequest } from 'src/helpers'
+import { getTokenByRequest } from 'src/common/helpers'
 
 @Controller('investments')
 @ApiTags('Investments')

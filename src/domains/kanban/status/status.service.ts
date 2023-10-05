@@ -7,7 +7,7 @@ import { TaskStatusModel } from './models/task-status.model'
 import { CreateTaskStatusDto } from './dto/request/create-task-status.dto'
 import { UpdateTaskStatusDto } from './dto/request/update-task-status.dto'
 import { AttachTaskStatusToUserDto } from './dto/request/attach-task-status-to-user.dto'
-import { getBadRequest } from 'src/helpers'
+import { getBadRequest } from 'src/common/helpers'
 
 @Injectable()
 export class TaskStatusService {
@@ -168,7 +168,9 @@ export class TaskStatusService {
     try {
       return this.userTaskStatusRepository.findOrCreate({
         raw: true,
-        where: item,
+        where: {
+          ...item,
+        },
         defaults: item,
       })
     } catch (e) {

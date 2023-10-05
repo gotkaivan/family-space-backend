@@ -7,7 +7,7 @@ import { BoardDto } from './dto/task-group.dto'
 import { UpdateBoardDto } from './dto/request/update-board.dto'
 import { CreateBoardDto } from './dto/request/create-board.dto'
 import { BoardUserModel } from './models/board-user.model'
-import { getBadRequest } from 'src/helpers'
+import { getBadRequest } from 'src/common/helpers'
 
 @Injectable()
 export class BoardService {
@@ -138,7 +138,9 @@ export class BoardService {
     try {
       return this.userBoardRepository.findOrCreate({
         raw: true,
-        where: item,
+        where: {
+          ...item,
+        },
         defaults: item,
       })
     } catch (e) {

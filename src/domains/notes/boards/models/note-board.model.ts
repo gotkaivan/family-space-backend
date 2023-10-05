@@ -19,13 +19,17 @@ export class NoteBoardModel extends Model<NoteBoardModel, CreateNoteBoardDto> {
   })
   id: number
 
-  @ApiProperty({ example: 'Задача', description: 'Название задачи' })
+  @ApiProperty({ example: 'Задача', description: 'Название набора заметок' })
   @Column({ type: DataType.STRING, allowNull: false })
   title: string
 
-  @ApiProperty({ example: 'Описание задачи', description: 'Описание задачи' })
+  @ApiProperty({ example: 'Описание задачи', description: 'Описание набора заметок' })
   @Column({ type: DataType.STRING, allowNull: false })
   description: string
+
+  @ApiProperty({ example: '1000000', description: 'Позиция набора заметок' })
+  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 1 })
+  position: number
 
   @ApiProperty({ example: false, description: 'Закреп набора' })
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })

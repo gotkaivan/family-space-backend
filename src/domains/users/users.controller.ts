@@ -4,7 +4,7 @@ import { JwtAuthGuard } from 'src/domains/auth/guards/jwt-auth.guard'
 import { UsersService } from './users.service'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UserDto } from './dto/user.dto'
-import { getTokenByRequest } from 'src/helpers'
+import { getTokenByRequest } from 'src/common/helpers'
 import { Request } from 'express'
 
 @Controller('users')

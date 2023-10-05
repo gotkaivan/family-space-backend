@@ -2,13 +2,15 @@ import { Controller, UseGuards, Body, Post, Req, Patch, Delete, Get, Param } fro
 import { Request } from 'express'
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger'
 import { JwtAuthGuard } from 'src/domains/auth/guards/jwt-auth.guard'
-import { getTokenByRequest } from 'src/helpers'
+import { getTokenByRequest } from 'src/common/helpers'
 import { TransactionService } from './transaction.service'
 import { TransactionDto } from './dto/transaction.dto'
 import { CreateTransactionDto } from './dto/request/create-transaction.dto'
 import { CreateTransactionResponseDto } from './dto/response/create-transaction.dto'
 import { UpdateTransactionResponseDto } from './dto/response/update-transaction.dto'
 import { DeleteTransactionResponseDto } from './dto/response/delete-transaction.dto'
+import { TransactionRequestOptionsDto } from './dto/request/transaction-request-options.dto'
+import { GetTransactionsResponseDto } from './dto/response/get-transactions.dto'
 
 @Controller('transactions')
 @ApiTags('Transactions')
@@ -18,10 +20,13 @@ export class TransactionController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Получение всех транзакций' })
-  @ApiResponse({ status: 200, type: [TransactionDto] })
-  @Get()
-  public async getTransactions(@Req() request: Request): Promise<TransactionDto[]> {
-    return this.transactionService.getTransactions(getTokenByRequest(request))
+  @ApiResponse({ status: 200, type: GetTransactionsResponseDto })
+  @Post()
+  public async getTransactions(
+    @Req() request: Request,
+    @Body() options: TransactionRequestOptionsDto
+  ): Promise<GetTransactionsResponseDto> {
+    return this.transactionService.getTransactions(getTokenByRequest(request), options)
   }
 
   @UseGuards(JwtAuthGuard)

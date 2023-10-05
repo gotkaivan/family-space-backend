@@ -3,7 +3,7 @@ import { Controller, UseGuards, Body, Post, Req, Patch, Delete, Get, Param } fro
 import { Request } from 'express'
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger'
 import { JwtAuthGuard } from 'src/domains/auth/guards/jwt-auth.guard'
-import { getTokenByRequest } from 'src/helpers'
+import { getTokenByRequest } from 'src/common/helpers'
 import { BoardDto } from './dto/task-group.dto'
 import { CreateBoardDto } from './dto/request/create-board.dto'
 import { CreateBoardResponseDto } from './dto/response/create-board.dto'

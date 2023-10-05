@@ -27,8 +27,12 @@ export class BoardModel extends Model<BoardModel, CreateBoardDto> {
   description: string
 
   @ApiProperty({ example: '1000000', description: 'Позиция группы' })
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 1 })
   position: number
+
+  @ApiProperty({ example: false, description: 'Закреп группы' })
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
+  isFavorite: boolean
 
   @BelongsToMany(() => UserModel, () => BoardUserModel)
   user: UserEntity[]

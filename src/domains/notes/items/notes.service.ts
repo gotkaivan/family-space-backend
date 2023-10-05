@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { UsersService } from 'src/domains/users/users.service'
-import { getBadRequest } from 'src/helpers'
+import { getBadRequest } from 'src/common/helpers'
 import { NoteModel } from './models/note.model'
 import { NoteUserModel } from './models/note-user.model'
 import { NoteDto } from './dto/note.dto'
@@ -144,7 +144,9 @@ export class NotesService {
     try {
       return this.noteUserRepository.findOrCreate({
         raw: true,
-        where: item,
+        where: {
+          ...item,
+        },
         defaults: item,
       })
     } catch (e) {
