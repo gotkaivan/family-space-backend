@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNumber, IsString } from 'class-validator'
-import { CURRENCY_TYPE, ITransaction, TRANSACTION_TYPES } from '../types'
+import { ITransaction, TRANSACTION_STATUSES, TRANSACTION_TYPES } from '../types'
+import { CURRENCY_TYPE } from 'src/common/types'
 
 export class TransactionEntity implements ITransaction {
   @ApiProperty({ example: 'id', description: 'Идентификатор набора' })
@@ -35,11 +36,23 @@ export class TransactionEntity implements ITransaction {
   @IsNumber()
   readonly currentPrice: number
 
-  @ApiProperty({ example: '777', description: 'Количество единиц' })
+  @ApiProperty({ example: '777', description: 'Количество единиц при покупке' })
   @IsNumber()
-  readonly amount: number
+  readonly purchaseAmount: number
+
+  @ApiProperty({ example: '777', description: 'Текущее количество единиц' })
+  @IsNumber()
+  readonly currentAmount: number
 
   @ApiProperty({ example: '', description: 'Дата совершения транзакции', nullable: true })
   @IsNumber()
   readonly transactionDate: string | null
+
+  @ApiProperty({ example: '1', description: 'ID транзакции для продажи', required: false })
+  @IsNumber()
+  readonly transactionSaleId?: number
+
+  @ApiProperty({ example: TRANSACTION_STATUSES.ACTIVE, description: 'Статус транзакции', enum: TRANSACTION_STATUSES })
+  @IsString({ message: 'Должно быть строкой' })
+  readonly status: TRANSACTION_STATUSES
 }

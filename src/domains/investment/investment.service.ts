@@ -1,42 +1,112 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
-import { InjectModel } from '@nestjs/sequelize'
-import { TransactionModel } from '../transaction/models/transaction.model'
-import { UsersService } from '../users/users.service'
-import { TransactionDto } from '../transaction/dto/transaction.dto'
+import { TransactionService } from '../transaction/transaction.service'
+import { getBadRequest } from 'src/common/helpers'
+import { GetInvestmentsResponseDto } from './dto/response/get-investments.dto'
+import { InvestmentRequestOptionsDto } from './dto/request/investment-request-options.dto'
+import { TransactionFiltersRequestDto } from '../transaction/dto/request/transaction-filters-request.dto'
 import { TRANSACTION_TYPES } from '../transaction/types'
+import { CreateInvestmentDto } from './dto/request/create-investment.dto'
+import { InvestmentDto } from './dto/investment.dto'
+import { UpdateInvestmentDto } from './dto/request/update-investment.dto'
+import { SaleInvestmentResponseDto } from './dto/response/sale-investment.dto'
 
 @Injectable()
 export class InvestmentService {
-  constructor(
-    @InjectModel(TransactionModel) private transactionRepository: typeof TransactionModel,
-    private userService: UsersService
-  ) {}
+  constructor(private transactionService: TransactionService) {}
 
   /**
    * Метод получения инвестиций
    * @param accessToken string
-   * @returns Promise<TransactionDto[]>
+   * @returns Promise<InvestmentDto[]>
    */
 
-  async getInvestments(accessToken: string): Promise<TransactionDto[]> {
+  async getInvestments(accessToken: string, options?: InvestmentRequestOptionsDto): Promise<GetInvestmentsResponseDto> {
     try {
-      const { id } = await this.userService.getUserByToken(accessToken)
-      return await this.transactionRepository.findAll({
-        order: [['id', 'ASC']],
-        where: {
-          transactionType: TRANSACTION_TYPES.INVESTMENT__TRANSACTION__TYPE,
-        },
-        include: [
-          {
-            attributes: [],
-            where: { id },
-            required: true,
-            association: 'user',
-          },
-        ],
-      })
+      const filters: TransactionFiltersRequestDto = {
+        ...options.filters,
+        transactionType: TRANSACTION_TYPES.INVESTMENT__TRANSACTION__TYPE,
+      }
+      return await this.transactionService.getTransactions(accessToken, { ...options, filters })
     } catch (e) {
       throw new HttpException('Инвестиции не найдены или пренадлежат другому пользователю', HttpStatus.NOT_FOUND)
+    }
+  }
+
+  /**
+   * Метод создания инвестиции
+   * @param accessToken string
+   * @param investment CreateInvestmentDto
+   * @returns Promise<InvestmentDto>
+   */
+
+  async createInvestment(accessToken: string, investment: CreateInvestmentDto): Promise<InvestmentDto> {
+    try {
+      return await this.transactionService.createTransaction(accessToken, investment)
+    } catch (e) {
+      getBadRequest('Не удалось создать инвестицию')
+    }
+  }
+
+  /**
+   * Метод создания инвестиции
+   * @param accessToken string
+   * @param investment UpdateInvestmentDto
+   * @returns Promise<InvestmentDto>
+   */
+
+  async updateInvestment(accessToken: string, investment: UpdateInvestmentDto): Promise<InvestmentDto> {
+    try {
+      return await this.transactionService.updateTransaction(accessToken, investment.id, investment)
+    } catch (e) {
+      getBadRequest('Не удалось обновить инвестицию')
+    }
+  }
+
+  /**
+   * Метод продажи инвестиции
+   * @param accessToken string
+   * @param investment UpdateInvestmentDto
+   * @returns Promise<InvestmentDto>
+   */
+
+  async saleInvestment(accessToken: string, sale: UpdateInvestmentDto): Promise<SaleInvestmentResponseDto> {
+    const { id: saleId, ...saleWithoutId } = sale
+    if (!sale.transactionSaleId) {
+      getBadRequest('Не удалось найти инвестицию')
+      return
+    }
+
+    try {
+      const investment = await this.transactionService.getTransactionById(accessToken, saleId)
+
+      const amount = +investment.currentAmount - +sale.currentAmount
+      const createdSaleTransaction = await this.transactionService.createTransaction(accessToken, saleWithoutId)
+
+      const updatedInvestment = await this.transactionService.updateTransaction(accessToken, investment.id, {
+        ...investment,
+        currentAmount: amount,
+      })
+
+      return {
+        sale: createdSaleTransaction,
+        investment: updatedInvestment,
+      }
+    } catch (e) {
+      getBadRequest('Не удалось продать инвестицию')
+    }
+  }
+
+  /**
+   * Метод удаления инвестиции
+   * @param id number
+   * @returns Promise<{ id: numebr }>
+   */
+
+  async deleteInvestment(accessToken: string, id: number): Promise<{ id: number }> {
+    try {
+      return await this.transactionService.deleteTransaction(accessToken, id)
+    } catch (e) {
+      getBadRequest('Не удалось удалить инвестицию')
     }
   }
 }

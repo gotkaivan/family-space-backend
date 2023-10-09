@@ -12,6 +12,8 @@ import { AttachTransactionToUser } from './dto/request/attach-transaction-to-use
 import { TransactionFiltersRequestDto } from './dto/request/transaction-filters-request.dto'
 import { TransactionRequestOptionsDto } from './dto/request/transaction-request-options.dto'
 import { GetTransactionsResponseDto } from './dto/response/get-transactions.dto'
+import { UpdateSaleTransactionResponseDto } from './dto/response/update-sale-transaction.dto'
+import { TRANSACTION_TYPES } from './types'
 
 @Injectable()
 export class TransactionService {
@@ -101,10 +103,10 @@ export class TransactionService {
    * @returns Promise<TransactionDto>
    */
 
-  async createTransaction(accessToken: string, board: CreateTransactionDto): Promise<TransactionDto> {
+  async createTransaction(accessToken: string, transaction: CreateTransactionDto): Promise<TransactionDto> {
     try {
       const { id: userId } = await this.userService.getUserByToken(accessToken)
-      const { id: transactionId } = await this.transactionRepository.create({ ...board })
+      const { id: transactionId } = await this.transactionRepository.create({ ...transaction })
       await this.attachTransactionToUser({ userId, transactionId })
       return this.getTransactionById(accessToken, transactionId)
     } catch (e) {
@@ -120,10 +122,10 @@ export class TransactionService {
    * @returns Promise<TransactionDto>
    */
 
-  async updateTransaction(accessToken: string, transaction: UpdateTransactionDto): Promise<TransactionDto> {
+  async updateTransaction(accessToken: string, id: number, transaction: UpdateTransactionDto): Promise<TransactionDto> {
     try {
-      await this.transactionRepository.update({ ...transaction }, { where: { id: transaction.id } })
-      return await this.getTransactionById(accessToken, transaction.id)
+      await this.transactionRepository.update({ ...transaction }, { where: { id } })
+      return await this.getTransactionById(accessToken, id)
     } catch (e) {
       getBadRequest('Не удалось обновить транзакцию')
     }
@@ -135,8 +137,16 @@ export class TransactionService {
    * @returns Promise<{ id: numebr }>
    */
 
-  async deleteTransaction(id: number): Promise<{ id: number }> {
+  async deleteTransaction(accessToken: string, id: number): Promise<{ id: number }> {
     try {
+      const { id: transactionId, transactionType } = await this.getTransactionById(accessToken, id)
+      if (transactionType === TRANSACTION_TYPES.INVESTMENT__TRANSACTION__TYPE) {
+        await this.transactionRepository.destroy({
+          where: {
+            transactionSaleId: transactionId,
+          },
+        })
+      }
       const deletedId = await this.transactionRepository.destroy({
         where: {
           id,
@@ -172,6 +182,78 @@ export class TransactionService {
       })
     } catch (e) {
       getBadRequest('Не удалось прикрепить транзакцию к пользователю')
+    }
+  }
+
+  async updateSaleTransaction(
+    accessToken: string,
+    sale: UpdateTransactionDto
+  ): Promise<UpdateSaleTransactionResponseDto> {
+    if (!sale.transactionSaleId) {
+      getBadRequest('Не удалось найти инвестицию')
+      return
+    }
+    try {
+      const investment = await this.getTransactionById(accessToken, sale.transactionSaleId)
+      const salePreview = await this.getTransactionById(accessToken, sale.id)
+
+      let updatedInvestmentRequest = {
+        ...investment,
+      }
+
+      if (+sale.currentAmount > +salePreview.currentAmount) {
+        const saleAmount = +sale.currentAmount - +salePreview.currentAmount
+        const amount = +investment.currentAmount - +saleAmount
+
+        updatedInvestmentRequest = {
+          ...investment,
+          currentAmount: amount,
+        }
+      }
+
+      if (+sale.currentAmount < +salePreview.currentAmount) {
+        const saleAmount = +salePreview.currentAmount - +sale.currentAmount
+        const amount = +investment.currentAmount + +saleAmount
+        updatedInvestmentRequest = {
+          ...investment,
+          currentAmount: amount,
+        }
+      }
+      const updatedSaleTransaction = await this.updateTransaction(accessToken, sale.id, sale)
+      const updatedInvestment = await this.updateTransaction(accessToken, investment.id, updatedInvestmentRequest)
+      return {
+        sale: updatedSaleTransaction,
+        transaction: updatedInvestment,
+      }
+    } catch (e) {
+      getBadRequest('Не удалось обновить транзакцию по продаже')
+    }
+  }
+
+  /**
+   * Метод удаления транзакции продажи
+   * @param id number
+   * @returns Promise<{ id: numebr }>
+   */
+
+  async deleteSaleTransaction(accessToken: string, id: number): Promise<{ id: number }> {
+    try {
+      const { id: saleId, transactionSaleId } = await this.getTransactionById(accessToken, id)
+      if (!transactionSaleId) {
+        getBadRequest('Не удалось найти инвестицию')
+        return
+      }
+      const investment = await this.getTransactionById(accessToken, transactionSaleId)
+      await this.updateTransaction(accessToken, investment.id, {
+        ...investment,
+        currentAmount: investment.purchaseAmount,
+      })
+      await this.deleteTransaction(accessToken, id)
+      return {
+        id: saleId,
+      }
+    } catch (e) {
+      getBadRequest('Не удалось удалить транзакцию продажи')
     }
   }
 

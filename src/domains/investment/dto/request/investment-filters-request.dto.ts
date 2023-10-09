@@ -1,17 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsString } from 'class-validator'
-import { ITransactionFilterOptions, TRANSACTION_TYPES } from '../../types'
-import { TransactionFiltersDateDto } from './transaction-filter-date.dto'
 import { CURRENCY_TYPE } from 'src/common/types'
+import { IInvestmentFilterOptions } from '../../types'
+import { InvestmentFiltersDateDto } from './investment-filter-date.dto'
 
-export class TransactionFiltersRequestDto implements ITransactionFilterOptions {
+export class InvestmentFiltersRequestDto implements IInvestmentFilterOptions {
   @ApiProperty({ example: 'search', description: 'Поисковой запрос', required: false })
   @IsString()
   readonly search: string
-
-  @ApiProperty({ example: 'income', description: 'Тип транзакции', enum: TRANSACTION_TYPES, required: false })
-  @IsString({ message: 'Должно быть строкой' })
-  readonly transactionType: TRANSACTION_TYPES
 
   @ApiProperty({ example: 'EUR', description: 'Тип валюты', enum: CURRENCY_TYPE, required: false })
   @IsString({ message: 'Должно быть строкой' })
@@ -20,8 +16,8 @@ export class TransactionFiltersRequestDto implements ITransactionFilterOptions {
   @ApiProperty({
     example: '',
     description: 'Дата совершения транзакции',
-    type: TransactionFiltersDateDto,
+    type: InvestmentFiltersDateDto,
     required: false,
   })
-  readonly transactionDate: TransactionFiltersDateDto
+  readonly transactionDate: InvestmentFiltersDateDto
 }

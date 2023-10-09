@@ -1,14 +1,15 @@
+import { CURRENCY_TYPE } from 'src/common/types'
+
+export enum TRANSACTION_STATUSES {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
+
 export enum TRANSACTION_TYPES {
   INCOME__TRANSACTION__TYPE = 'income',
   EXPENSES__TRANSACTION__TYPE = 'expenses',
   INVESTMENT__TRANSACTION__TYPE = 'investment',
   SALE__TRANSACTION__TYPE = 'sale',
-}
-
-export enum CURRENCY_TYPE {
-  EUR = 'EUR',
-  RUB = 'RUB',
-  USD = 'USD',
 }
 
 export interface ITransaction {
@@ -18,10 +19,12 @@ export interface ITransaction {
   transactionType: TRANSACTION_TYPES
   currencyType: CURRENCY_TYPE
   purchasePrice: number
-  owesPrice?: number
   currentPrice: number
-  amount: number
+  owesPrice?: number
+  purchaseAmount: number
+  currentAmount: number
   transactionDate: string
+  status: TRANSACTION_STATUSES
 }
 
 export interface ITransactionFilterDate {

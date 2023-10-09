@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { BelongsToMany, Column, DataType, Model, Table } from 'sequelize-typescript'
+import { BelongsToMany, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
 import { CreateTransactionDto } from '../dto/request/create-transaction.dto'
-import { CURRENCY_TYPE, TRANSACTION_TYPES } from '../types'
+import { TRANSACTION_STATUSES, TRANSACTION_TYPES } from '../types'
 import { UserModel } from 'src/domains/users/user.model'
 import { TransactionUserModel } from './transaction-user.model'
 import { UserEntity } from 'src/domains/users/entity/user.entity'
+import { CURRENCY_TYPE } from 'src/common/types'
 
 @Table({ tableName: 'transactions', createdAt: 'created', updatedAt: 'updated' })
 export class TransactionModel extends Model<TransactionModel, CreateTransactionDto> {
@@ -48,13 +49,26 @@ export class TransactionModel extends Model<TransactionModel, CreateTransactionD
   @Column({ type: DataType.INTEGER, allowNull: false })
   currentPrice: number
 
-  @ApiProperty({ example: '777', description: 'Количество единиц' })
+  @ApiProperty({ example: '777', description: 'Количество единиц при покупке' })
   @Column({ type: DataType.INTEGER, allowNull: false })
-  amount: number
+  purchaseAmount: number
+
+  @ApiProperty({ example: '777', description: 'Текущее количество единиц' })
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  currentAmount: number
 
   @ApiProperty({ example: '', description: 'Дата совершения транзакции', nullable: true })
   @Column({ type: DataType.STRING, allowNull: true })
   transactionDate: string | null
+
+  @ApiProperty({ example: TRANSACTION_STATUSES.ACTIVE, description: 'Статус транзакции' })
+  @Column({ type: DataType.STRING, allowNull: false, defaultValue: TRANSACTION_STATUSES.ACTIVE })
+  status: TRANSACTION_STATUSES
+
+  @ForeignKey(() => TransactionModel)
+  @ApiProperty({ example: '1', description: 'ID статуса', required: false })
+  @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: null })
+  transactionSaleId?: number | null
 
   @BelongsToMany(() => UserModel, () => TransactionUserModel)
   user: UserEntity[]
