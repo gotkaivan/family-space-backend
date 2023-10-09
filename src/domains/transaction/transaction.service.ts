@@ -58,7 +58,7 @@ export class TransactionService {
         ...attributes,
         limit: options.pagination.limit,
         offset: (options.pagination.page - 1) * options.pagination.limit,
-        order: [['id', 'ASC']],
+        order: [['transactionDate', 'DESC']],
       })
 
       return {
@@ -110,7 +110,6 @@ export class TransactionService {
       await this.attachTransactionToUser({ userId, transactionId })
       return this.getTransactionById(accessToken, transactionId)
     } catch (e) {
-      console.log(e)
       getBadRequest('Не удалось создать транзакцию')
     }
   }
