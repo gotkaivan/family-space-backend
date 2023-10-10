@@ -13,14 +13,17 @@ import { TransactionFiltersRequestDto } from './dto/request/transaction-filters-
 import { TransactionRequestOptionsDto } from './dto/request/transaction-request-options.dto'
 import { GetTransactionsResponseDto } from './dto/response/get-transactions.dto'
 import { UpdateSaleTransactionResponseDto } from './dto/response/update-sale-transaction.dto'
-import { TRANSACTION_TYPES } from './types'
+import { TRANSACTION_STATUSES, TRANSACTION_TYPES } from './types'
+import { ITransactionHost } from 'src/common/types'
+import { Sequelize } from 'sequelize-typescript'
 
 @Injectable()
 export class TransactionService {
   constructor(
     @InjectModel(TransactionModel) private transactionRepository: typeof TransactionModel,
     @InjectModel(TransactionUserModel) private transactionUserRepository: typeof TransactionUserModel,
-    private userService: UsersService
+    private userService: UsersService,
+    private sequelize: Sequelize
   ) {}
 
   /**
@@ -41,6 +44,7 @@ export class TransactionService {
       const attributes = {
         where: {
           ...filters,
+          status: TRANSACTION_STATUSES.ACTIVE,
         },
         include: [
           {
@@ -103,12 +107,22 @@ export class TransactionService {
    * @returns Promise<TransactionDto>
    */
 
-  async createTransaction(accessToken: string, transaction: CreateTransactionDto): Promise<TransactionDto> {
+  async createTransaction(
+    accessToken: string,
+    transaction: CreateTransactionDto,
+    transactionHost?: ITransactionHost
+  ): Promise<TransactionDto> {
     try {
-      const { id: userId } = await this.userService.getUserByToken(accessToken)
-      const { id: transactionId } = await this.transactionRepository.create({ ...transaction })
-      await this.attachTransactionToUser({ userId, transactionId })
-      return this.getTransactionById(accessToken, transactionId)
+      const callback = async (transactionHost: ITransactionHost) => {
+        const { id: userId } = await this.userService.getUserByToken(accessToken)
+        const { id: transactionId } = await this.transactionRepository.create({ ...transaction }, transactionHost)
+        await this.attachTransactionToUser({ userId, transactionId }, transactionHost)
+        return this.getTransactionById(accessToken, transactionId)
+      }
+
+      return !!transactionHost
+        ? await callback(transactionHost)
+        : await this.sequelize.transaction(async (t) => callback({ transaction: t }))
     } catch (e) {
       getBadRequest('Не удалось создать транзакцию')
     }
@@ -121,9 +135,14 @@ export class TransactionService {
    * @returns Promise<TransactionDto>
    */
 
-  async updateTransaction(accessToken: string, id: number, transaction: UpdateTransactionDto): Promise<TransactionDto> {
+  async updateTransaction(
+    accessToken: string,
+    id: number,
+    transaction: UpdateTransactionDto,
+    transactionHost?: ITransactionHost
+  ): Promise<TransactionDto> {
     try {
-      await this.transactionRepository.update({ ...transaction }, { where: { id } })
+      await this.transactionRepository.update({ ...transaction }, { where: { id }, ...transactionHost })
       return await this.getTransactionById(accessToken, id)
     } catch (e) {
       getBadRequest('Не удалось обновить транзакцию')
@@ -136,29 +155,42 @@ export class TransactionService {
    * @returns Promise<{ id: numebr }>
    */
 
-  async deleteTransaction(accessToken: string, id: number): Promise<{ id: number }> {
+  async deleteTransaction(
+    accessToken: string,
+    id: number,
+    transactionHost?: ITransactionHost
+  ): Promise<{ id: number }> {
     try {
-      const { id: transactionId, transactionType } = await this.getTransactionById(accessToken, id)
-      if (transactionType === TRANSACTION_TYPES.INVESTMENT__TRANSACTION__TYPE) {
-        await this.transactionRepository.destroy({
+      const callback = async (transactionHost: ITransactionHost) => {
+        const { id: transactionId, transactionType } = await this.getTransactionById(accessToken, id)
+        if (transactionType === TRANSACTION_TYPES.INVESTMENT__TRANSACTION__TYPE) {
+          await this.transactionRepository.destroy({
+            where: {
+              transactionSaleId: transactionId,
+            },
+            ...transactionHost,
+          })
+        }
+        const deletedId = await this.transactionRepository.destroy({
           where: {
-            transactionSaleId: transactionId,
+            id,
           },
+          ...transactionHost,
         })
+
+        await this.transactionUserRepository.destroy({
+          where: {
+            transactionId: id,
+          },
+          ...transactionHost,
+        })
+
+        return { id: deletedId }
       }
-      const deletedId = await this.transactionRepository.destroy({
-        where: {
-          id,
-        },
-      })
 
-      await this.transactionUserRepository.destroy({
-        where: {
-          transactionId: id,
-        },
-      })
-
-      return { id: deletedId }
+      return !!transactionHost
+        ? await callback(transactionHost)
+        : await this.sequelize.transaction(async (t) => callback({ transaction: t }))
     } catch (e) {
       getBadRequest('Не удалось удалить набор')
     }
@@ -170,7 +202,7 @@ export class TransactionService {
    * @returns
    */
 
-  private async attachTransactionToUser(item: AttachTransactionToUser) {
+  private async attachTransactionToUser(item: AttachTransactionToUser, transactionHost?: ITransactionHost) {
     try {
       return this.transactionUserRepository.findOrCreate({
         raw: true,
@@ -178,6 +210,7 @@ export class TransactionService {
           ...item,
         },
         defaults: item,
+        ...transactionHost,
       })
     } catch (e) {
       getBadRequest('Не удалось прикрепить транзакцию к пользователю')
@@ -186,44 +219,61 @@ export class TransactionService {
 
   async updateSaleTransaction(
     accessToken: string,
-    sale: UpdateTransactionDto
+    sale: UpdateTransactionDto,
+    transactionHost?: ITransactionHost
   ): Promise<UpdateSaleTransactionResponseDto> {
     if (!sale.transactionSaleId) {
       getBadRequest('Не удалось найти инвестицию')
       return
     }
     try {
-      const investment = await this.getTransactionById(accessToken, sale.transactionSaleId)
-      const salePreview = await this.getTransactionById(accessToken, sale.id)
+      const callback = async (transactionHost: ITransactionHost) => {
+        const investment = await this.getTransactionById(accessToken, sale.transactionSaleId)
+        const salePreview = await this.getTransactionById(accessToken, sale.id)
 
-      let updatedInvestmentRequest = {
-        ...investment,
-      }
-
-      if (+sale.currentAmount > +salePreview.currentAmount) {
-        const saleAmount = +sale.currentAmount - +salePreview.currentAmount
-        const amount = +investment.currentAmount - +saleAmount
-
-        updatedInvestmentRequest = {
+        let updatedInvestmentRequest = {
           ...investment,
-          currentAmount: amount,
+        }
+
+        if (+sale.currentAmount > +salePreview.currentAmount) {
+          const saleAmount = +sale.currentAmount - +salePreview.currentAmount
+          const amount = +investment.currentAmount - +saleAmount
+          if (amount < 0) getBadRequest('Количество единиц продажи не должно превышать имеющееся количество единиц')
+
+          updatedInvestmentRequest = {
+            ...investment,
+            currentAmount: amount,
+            status: amount === 0 ? TRANSACTION_STATUSES.INACTIVE : TRANSACTION_STATUSES.ACTIVE,
+          }
+        }
+
+        if (+sale.currentAmount < +salePreview.currentAmount) {
+          const saleAmount = +salePreview.currentAmount - +sale.currentAmount
+          const amount = +investment.currentAmount + +saleAmount
+          if (amount < 0) getBadRequest('Количество единиц продажи не должно превышать имеющееся количество единиц')
+          updatedInvestmentRequest = {
+            ...investment,
+            currentAmount: amount,
+            status: amount === 0 ? TRANSACTION_STATUSES.INACTIVE : TRANSACTION_STATUSES.ACTIVE,
+          }
+        }
+        const updatedSaleTransaction = await this.updateTransaction(accessToken, sale.id, sale, transactionHost)
+        const updatedInvestment = await this.updateTransaction(
+          accessToken,
+          investment.id,
+          updatedInvestmentRequest,
+          transactionHost
+        )
+
+        return {
+          sale: updatedSaleTransaction,
+          transaction: updatedInvestment,
         }
       }
 
-      if (+sale.currentAmount < +salePreview.currentAmount) {
-        const saleAmount = +salePreview.currentAmount - +sale.currentAmount
-        const amount = +investment.currentAmount + +saleAmount
-        updatedInvestmentRequest = {
-          ...investment,
-          currentAmount: amount,
-        }
-      }
-      const updatedSaleTransaction = await this.updateTransaction(accessToken, sale.id, sale)
-      const updatedInvestment = await this.updateTransaction(accessToken, investment.id, updatedInvestmentRequest)
-      return {
-        sale: updatedSaleTransaction,
-        transaction: updatedInvestment,
-      }
+      return !!transactionHost
+        ? await callback(transactionHost)
+        : await this.sequelize.transaction(async (t) => callback({ transaction: t }))
     } catch (e) {
       getBadRequest('Не удалось обновить транзакцию по продаже')
     }
@@ -235,32 +285,41 @@ export class TransactionService {
    * @returns Promise<{ id: numebr }>
    */
 
-  async deleteSaleTransaction(accessToken: string, id: number): Promise<{ id: number }> {
+  async deleteSaleTransaction(
+    accessToken: string,
+    id: number,
+    transactionHost?: ITransactionHost
+  ): Promise<{ id: number }> {
     try {
       const { id: saleId, transactionSaleId } = await this.getTransactionById(accessToken, id)
       if (!transactionSaleId) {
         getBadRequest('Не удалось найти инвестицию')
         return
       }
-      const investment = await this.getTransactionById(accessToken, transactionSaleId)
-      await this.updateTransaction(accessToken, investment.id, {
-        ...investment,
-        currentAmount: investment.purchaseAmount,
-      })
-      await this.deleteTransaction(accessToken, id)
-      return {
-        id: saleId,
+      const callback = async (transactionHost: ITransactionHost) => {
+        const investment = await this.getTransactionById(accessToken, transactionSaleId)
+        await this.updateTransaction(
+          accessToken,
+          investment.id,
+          {
+            ...investment,
+            currentAmount: investment.purchaseAmount,
+          },
+          transactionHost
+        )
+        await this.deleteTransaction(accessToken, id, transactionHost)
+        return {
+          id: saleId,
+        }
       }
+
+      return !!transactionHost
+        ? await callback(transactionHost)
+        : await this.sequelize.transaction(async (t) => callback({ transaction: t }))
     } catch (e) {
       getBadRequest('Не удалось удалить транзакцию продажи')
     }
   }
-
-  /**
-   * Метод прикрепления транзакции к пользователю
-   * @param item AttachTransactionToUser
-   * @returns
-   */
 
   private formatRequestFilters(options: TransactionFiltersRequestDto | undefined) {
     const response = {}

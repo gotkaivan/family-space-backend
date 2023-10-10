@@ -4,15 +4,17 @@ import { getBadRequest } from 'src/common/helpers'
 import { GetInvestmentsResponseDto } from './dto/response/get-investments.dto'
 import { InvestmentRequestOptionsDto } from './dto/request/investment-request-options.dto'
 import { TransactionFiltersRequestDto } from '../transaction/dto/request/transaction-filters-request.dto'
-import { TRANSACTION_TYPES } from '../transaction/types'
+import { TRANSACTION_STATUSES, TRANSACTION_TYPES } from '../transaction/types'
 import { CreateInvestmentDto } from './dto/request/create-investment.dto'
 import { InvestmentDto } from './dto/investment.dto'
 import { UpdateInvestmentDto } from './dto/request/update-investment.dto'
 import { SaleInvestmentResponseDto } from './dto/response/sale-investment.dto'
+import { Sequelize } from 'sequelize-typescript'
+import { ITransactionHost } from 'src/common/types'
 
 @Injectable()
 export class InvestmentService {
-  constructor(private transactionService: TransactionService) {}
+  constructor(private transactionService: TransactionService, private sequelize: Sequelize) {}
 
   /**
    * Метод получения инвестиций
@@ -77,20 +79,40 @@ export class InvestmentService {
     }
 
     try {
-      const investment = await this.transactionService.getTransactionById(accessToken, saleId)
+      await this.sequelize.transaction(async (t) => {
+        const transactionHost: ITransactionHost = { transaction: t }
 
-      const amount = +investment.currentAmount - +sale.currentAmount
-      const createdSaleTransaction = await this.transactionService.createTransaction(accessToken, saleWithoutId)
+        const investment = await this.transactionService.getTransactionById(accessToken, saleId)
 
-      const updatedInvestment = await this.transactionService.updateTransaction(accessToken, investment.id, {
-        ...investment,
-        currentAmount: amount,
+        const amount = +investment.currentAmount - +sale.currentAmount
+
+        if (amount < 0) getBadRequest('Количество единиц продажи не должно превышать имеющееся количество единиц')
+
+        const createdSaleTransaction = await this.transactionService.createTransaction(
+          accessToken,
+          saleWithoutId,
+          transactionHost
+        )
+
+        const investmentForUpdate = {
+          ...investment,
+          currentAmount: amount,
+          status: TRANSACTION_STATUSES.ACTIVE,
+        }
+        if (amount === 0) investmentForUpdate.status = TRANSACTION_STATUSES.INACTIVE
+
+        const updatedInvestment = await this.transactionService.updateTransaction(
+          accessToken,
+          investment.id,
+          { ...investmentForUpdate },
+          transactionHost
+        )
+
+        return {
+          sale: createdSaleTransaction,
+          investment: updatedInvestment,
+        }
       })
-
-      return {
-        sale: createdSaleTransaction,
-        investment: updatedInvestment,
-      }
     } catch (e) {
       getBadRequest('Не удалось продать инвестицию')
     }
