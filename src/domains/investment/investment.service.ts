@@ -97,9 +97,8 @@ export class InvestmentService {
         const investmentForUpdate = {
           ...investment,
           currentAmount: amount,
-          status: TRANSACTION_STATUSES.ACTIVE,
+          status: amount === 0 ? TRANSACTION_STATUSES.INACTIVE : TRANSACTION_STATUSES.ACTIVE,
         }
-        if (amount === 0) investmentForUpdate.status = TRANSACTION_STATUSES.INACTIVE
 
         const updatedInvestment = await this.transactionService.updateTransaction(
           accessToken,

@@ -25,6 +25,7 @@ export interface ITransaction {
   currentAmount: number
   transactionDate: string
   status: TRANSACTION_STATUSES
+  isExistBefore?: boolean
 }
 
 export interface ITransactionFilterDate {

@@ -70,6 +70,14 @@ export class TransactionModel extends Model<TransactionModel, CreateTransactionD
   @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: null })
   transactionSaleId?: number | null
 
+  @ApiProperty({
+    example: false,
+    description: 'Признак существования инвестиции до начала вычислений',
+    required: false,
+  })
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
+  isExistBefore: boolean
+
   @BelongsToMany(() => UserModel, () => TransactionUserModel)
   user: UserEntity[]
 }
