@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsString, IsNumber } from 'class-validator'
-import { INoteBoard } from '../types'
+import { INoteGroup } from '../types'
 
-export class NoteBoardEntity implements INoteBoard {
+export class NoteGroupEntity implements INoteGroup {
   @ApiProperty({ example: 'id', description: 'Идентификатор набора' })
   @IsString({ message: '' })
   readonly id: number

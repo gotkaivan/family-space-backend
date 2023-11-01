@@ -11,7 +11,7 @@ export class NoteEntity implements INote {
   @IsString({ message: 'Должно быть строкой' })
   readonly title: string
 
-  @ApiProperty({ example: 'Описание', description: 'Описание заметки' })
+  @ApiProperty({ example: 'Описание', description: 'Описание заметки', required: false })
   @IsString({ message: 'Должно быть строкой' })
   readonly description: string
 

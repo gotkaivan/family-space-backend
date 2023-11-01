@@ -2,14 +2,13 @@ import { ApiProperty } from '@nestjs/swagger'
 import { BelongsToMany, Column, DataType, HasMany, Model, Table } from 'sequelize-typescript'
 import { UserModel } from 'src/domains/users/user.model'
 import { UserEntity } from 'src/domains/users/entity/user.entity'
-import { CreateNoteBoardDto } from '../dto/request/create-note-board.dto'
+import { CreateNoteGroupDto } from '../dto/request/create-note-group.dto'
 import { NoteEntity } from '../../items/entity/note.entity'
 import { NoteModel } from '../../items/models/note.model'
-import { NoteUserModel } from '../../items/models/note-user.model'
-import { NoteBoardUserModel } from './note-board-user.model'
+import { NoteGroupUserModel } from './note-group-user.model'
 
-@Table({ tableName: 'note-boards', createdAt: 'created', updatedAt: 'updated' })
-export class NoteBoardModel extends Model<NoteBoardModel, CreateNoteBoardDto> {
+@Table({ tableName: 'note-groups', createdAt: 'created', updatedAt: 'updated' })
+export class NoteGroupModel extends Model<NoteGroupModel, CreateNoteGroupDto> {
   @ApiProperty({ description: 'Уникальный идентификатор' })
   @Column({
     type: DataType.INTEGER,
@@ -19,11 +18,11 @@ export class NoteBoardModel extends Model<NoteBoardModel, CreateNoteBoardDto> {
   })
   id: number
 
-  @ApiProperty({ example: 'Задача', description: 'Название набора заметок' })
+  @ApiProperty({ example: 'Группа заметок', description: 'Название набора заметок' })
   @Column({ type: DataType.STRING, allowNull: false })
   title: string
 
-  @ApiProperty({ example: 'Описание задачи', description: 'Описание набора заметок' })
+  @ApiProperty({ example: 'Описание группы заметок', description: 'Описание набора заметок' })
   @Column({ type: DataType.STRING, allowNull: false })
   description: string
 
@@ -35,7 +34,7 @@ export class NoteBoardModel extends Model<NoteBoardModel, CreateNoteBoardDto> {
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
   isFavorite: boolean
 
-  @BelongsToMany(() => UserModel, () => NoteBoardUserModel)
+  @BelongsToMany(() => UserModel, () => NoteGroupUserModel)
   user: UserEntity[]
 
   @HasMany(() => NoteModel)

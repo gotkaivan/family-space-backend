@@ -1,7 +1,7 @@
 export interface INote {
   id: number
   title: string
-  description: string
+  description?: string
   content: string
   boardId: number
   isFavorite: boolean

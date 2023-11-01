@@ -2,18 +2,18 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { UsersService } from 'src/domains/users/users.service'
 import { getBadRequest } from 'src/common/helpers'
-import { NoteBoardModel } from './models/note-board.model'
-import { NoteBoardUserModel } from './models/note-board-user.model'
-import { NoteBoardDto } from './dto/note.dto'
-import { CreateNoteBoardDto } from './dto/request/create-note-board.dto'
-import { AttachNoteBoardToUser } from './dto/request/attach-note-board-to-user'
-import { UpdateNoteBoardDto } from './dto/request/update-note-board.dto'
+import { UpdateNoteBoardDto } from './dto/request/update-note-group.dto'
+import { NoteGroupUserModel } from './models/note-group-user.model'
+import { NoteGroupModel } from './models/note-group.model'
+import { NoteGroupDto } from './dto/note-group.dto'
+import { CreateNoteGroupDto } from './dto/request/create-note-group.dto'
+import { AttachNoteGroupToUser } from './dto/request/attach-note-group-to-user'
 
 @Injectable()
 export class NoteBoardsService {
   constructor(
-    @InjectModel(NoteBoardModel) private noteBoardRepository: typeof NoteBoardModel,
-    @InjectModel(NoteBoardUserModel) private noteBoardUserRepository: typeof NoteBoardUserModel,
+    @InjectModel(NoteGroupModel) private noteBoardRepository: typeof NoteGroupModel,
+    @InjectModel(NoteGroupUserModel) private noteBoardUserRepository: typeof NoteGroupUserModel,
     private userService: UsersService
   ) {}
 
@@ -23,7 +23,7 @@ export class NoteBoardsService {
    * @returns Promise<NoteBoardDto[]>
    */
 
-  async getNoteBoards(accessToken: string): Promise<NoteBoardDto[]> {
+  async getNoteBoards(accessToken: string): Promise<NoteGroupDto[]> {
     try {
       const { id } = await this.userService.getUserByToken(accessToken)
       return await this.noteBoardRepository.findAll({
@@ -49,7 +49,7 @@ export class NoteBoardsService {
    * @returns Promise<NoteBoardDto>
    */
 
-  async getNoteBoardById(accessToken: string, id: number): Promise<NoteBoardDto> {
+  async getNoteBoardById(accessToken: string, id: number): Promise<NoteGroupDto> {
     try {
       const user = await this.userService.getUserByToken(accessToken)
       return await this.noteBoardRepository.findOne({
@@ -75,7 +75,7 @@ export class NoteBoardsService {
    * @returns Promise<NoteBoardDto>
    */
 
-  async createNoteBoard(accessToken: string, board: CreateNoteBoardDto): Promise<NoteBoardDto> {
+  async createNoteBoard(accessToken: string, board: CreateNoteGroupDto): Promise<NoteGroupDto> {
     try {
       const { id: userId } = await this.userService.getUserByToken(accessToken)
       const { id: boardId } = await this.noteBoardRepository.create({ ...board })
@@ -93,7 +93,7 @@ export class NoteBoardsService {
    * @returns Promise<NoteBoardDto>
    */
 
-  async updateNoteBoard(accessToken: string, board: UpdateNoteBoardDto): Promise<NoteBoardDto> {
+  async updateNoteBoard(accessToken: string, board: UpdateNoteBoardDto): Promise<NoteGroupDto> {
     try {
       await this.noteBoardRepository.update({ ...board }, { where: { id: board.id } })
       return await this.getNoteBoardById(accessToken, board.id)
@@ -134,7 +134,7 @@ export class NoteBoardsService {
    * @returns
    */
 
-  private async attachNoteBoardToUser(item: AttachNoteBoardToUser) {
+  private async attachNoteBoardToUser(item: AttachNoteGroupToUser) {
     try {
       return this.noteBoardUserRepository.findOrCreate({
         raw: true,

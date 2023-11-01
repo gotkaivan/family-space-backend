@@ -32,6 +32,7 @@ export class TaskStatusService {
         order: [
           ['position', 'DESC'],
           ['tasks', 'position', 'DESC'],
+          ['tasks', 'subtasks', 'id', 'ASC'],
         ],
         include: [
           {
